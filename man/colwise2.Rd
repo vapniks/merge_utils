@@ -1,0 +1,41 @@
+\name{colwise2}
+\alias{colwise2}
+\title{Like \code{\link{colwise}}, but the returned function will return unaffected columns alongside affected ones
+if possible.}
+\usage{
+  colwise2(.fun, .cols = true, ...)
+}
+\arguments{
+  \item{.fun}{a function to apply to each column}
+
+  \item{.cols}{either a function that tests columns for
+  inclusion, or a quoted object giving which columns to
+  process}
+
+  \item{...}{other arguments passed on to ‘.fun’}
+}
+\value{
+  A function which accepts a dataframe as argument and
+  applies '.fun' to each of the columns specified in
+  '.cols'. Further arguments to the function will be passed
+  on to '.fun'.
+}
+\description{
+  Like \code{\link{colwise}}, but the returned function
+  will return unaffected columns alongside affected ones if
+  possible.
+}
+\details{
+  This function works like \code{\link{colwise}} except
+  that the function it returns also returns the columns not
+  specified by the '.cols' argument (as long as they are
+  compatible). If the unaffected columns have a different
+  number of rows than the affected ones, then only the
+  affected rows will be returned. The columns will be
+  returned in the same order as the original dataframe
+  argument to the function.
+}
+\author{
+  Ben Veal
+}
+

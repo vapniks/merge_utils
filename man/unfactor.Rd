@@ -1,0 +1,25 @@
+\name{unfactor}
+\alias{unfactor}
+\title{Convert factors into numeric/character/logical vectors.}
+\usage{
+  unfactor(x)
+}
+\arguments{
+  \item{x}{A factor vector, list or dataframe.}
+}
+\value{
+  A vector, list or dataframe containing no factors.
+}
+\description{
+  Convert factors into numeric/character/logical vectors.
+}
+\details{
+  This function converts factor vectors into a numeric,
+  character or logical vectors depending on the contents.
+  If 'x' is a list or dataframe then any constituent
+  factors will be converted.
+}
+\author{
+  Ben Veal
+}
+

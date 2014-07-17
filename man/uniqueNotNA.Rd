@@ -1,0 +1,23 @@
+\name{uniqueNotNA}
+\alias{uniqueNotNA}
+\title{Like 'unique' but omits NA's or NaN's, suppresses warnings, and returns result as character vector.}
+\usage{
+  uniqueNotNA(x, warn = FALSE)
+}
+\arguments{
+  \item{x}{A vector.}
+
+  \item{warn}{Whether to issue warnings from 'unique'
+  (default is FALSE).}
+}
+\value{
+  The unique values of 'x' with NA & NaN values removed.
+}
+\description{
+  Like 'unique' but omits NA's or NaN's, suppresses
+  warnings, and returns result as character vector.
+}
+\author{
+  Ben Veal
+}
+

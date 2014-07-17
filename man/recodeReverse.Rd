@@ -1,0 +1,32 @@
+\name{recodeReverse}
+\alias{recodeReverse}
+\title{Recode an ordered variable by reversing the codes.}
+\usage{
+  recodeReverse(var)
+}
+\arguments{
+  \item{var}{The variable containing the codes to be
+  reversed.}
+}
+\value{
+  The recoded variable with codes reversed.
+}
+\description{
+  Recode an ordered variable by reversing the codes.
+}
+\details{
+  Given a variable of integer codes (e.g. measured on a
+  Likert scale), or an ordered factor, this function will
+  recode the variable with the codes reversed, and return
+  the result.
+}
+\author{
+  Ben Veal
+}
+\seealso{
+  \code{\link{recodeAs}}, \code{\link{recodeMatches}},
+  \code{\link{recodeVar}}, \code{\link{colwise2}} for
+  recoding multiple dataframe columns simultaneously (in
+  library(plyr)).
+}
+

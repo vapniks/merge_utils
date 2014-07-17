@@ -1,0 +1,31 @@
+\name{contents}
+\alias{contents}
+\title{Find contents of variables/factors - either "numeric", "logical" or "character"}
+\usage{
+  contents(x)
+}
+\arguments{
+  \item{x}{}
+}
+\value{
+  A single string or a character vector
+}
+\description{
+  Find contents of variables/factors - either "numeric",
+  "logical" or "character"
+}
+\details{
+  If 'x' is a vector or matrix then a single string is
+  returned, if 'x' is a list or dataframe then a character
+  vector is returned with each entry indicating the
+  contents of the corresponding element/column.
+}
+\author{
+  Ben Veal
+}
+\seealso{
+  \code{\link{is.character.contents}},
+  \code{\link{is.numeric.contents}},
+  \code{\link{is.logical.contents}}
+}
+

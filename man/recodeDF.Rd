@@ -1,0 +1,34 @@
+\name{recodeDF}
+\alias{recodeDF}
+\title{Recode collection of variables so that they all the same unique values.}
+\usage{
+  recodeDF(df, sPatterns, sTargets = NA, nRecodes)
+}
+\arguments{
+  \item{df}{A dataframe to recode}
+
+  \item{sPatterns}{list of regexps matching strings to be
+  recoded}
+
+  \item{sTargets}{list of targets corresponding to patterns
+  in 'sPatterns'}
+
+  \item{nRecodes}{specification for recoding numbers (see
+  \code{\link{recode}})}
+}
+\value{
+  a dataframe (recoded)
+}
+\description{
+  Recode collection of variables so that they all the same
+  unique values.
+}
+\details{
+  This is a wrapper around \code{\link{recodeMatches}} &
+  \code{\link{recode}} (in library(car)) for recoding all
+  strings and numbers variables in a dataframe.
+}
+\author{
+  Ben Veal
+}
+

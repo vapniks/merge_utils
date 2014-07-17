@@ -1,0 +1,56 @@
+\name{multimerge}
+\alias{multimerge}
+\title{Merge multiple dataframe by common columns.}
+\usage{
+  multimerge(data, by, all = NULL, suffixes = NULL)
+}
+\arguments{
+  \item{data}{A list of dataframes to merge.}
+
+  \item{by}{A list of vectors each of which contains column
+  names/numbers to be used for matching rows of the
+  corresponding dataframe in 'data'. Each of these vectors
+  should be the same length.}
+
+  \item{all}{A list of vectors/NULL values, each indicating
+  which rows of the corresponding dataframe in 'data' to
+  keep. A NULL entry (default) indicates that all rows will
+  be kept. A vector entry should contain indices of
+  dataframes in 'data'. Then the only rows that will be
+  kept are those that match all the dataframes with those
+  indices.}
+
+  \item{suffixes}{A list of suffixes (one for each
+  dataframe) to be appended to clashing column names in
+  order to indicate the original dataframe.}
+}
+\value{
+  A single dataframe containing the merged data.
+}
+\description{
+  Merge multiple dataframe by common columns.
+}
+\details{
+  Given a list of dataframes, and a list of vectors each of
+  which contains the same number column names/numbers,
+  merge the dataframes by matching on the corresponding
+  columns. The 'by' argument specifies, for each dataframe,
+  which columns to use for matching - it should be a list
+  of numeric or character vectors. The optional 'all'
+  argument can be used to specify for each dataframe
+  whether to keep all rows, or just those matching some of
+  the other dataframes - it should be a list of NULLs
+  (meaning keep all rows) and/or vectors (indicating which
+  dataframes to match). If either of the lists supplied to
+  the 'by' or 'all' arguments are shorter than the list of
+  dataframes then the final element will be reused to cover
+  missing specifications. To avoid column name clashes, the
+  corresponding dataframe indices will be appended to the
+  names of any columns in the results that would otherwise
+  clash. Alternatively suffixes can be specified in the
+  'suffixes' argument, which should be a list of strings.
+}
+\author{
+  Ben Veal
+}
+

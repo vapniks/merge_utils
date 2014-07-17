@@ -1,0 +1,39 @@
+\name{matchStrings}
+\alias{matchStrings}
+\title{Match strings in A with strings in B}
+\usage{
+  matchStrings(A, B, onto = TRUE)
+}
+\arguments{
+  \item{A}{A character vector}
+
+  \item{B}{A character vector}
+
+  \item{onto}{If TRUE (default) then ensure all strings in
+  B are matched by at least one string in A if possible.}
+}
+\value{
+  A vector whose i'th entry indicates the element of B that
+  matches the i'th element of A
+}
+\description{
+  Match strings in A with strings in B
+}
+\details{
+  This function tries to match the strings in 'A' to the
+  closest ones in 'B'. By default it tries to ensure that
+  every element of 'B' is matched by at least one element
+  of 'A'. So if 'A' and 'B' have the same length it
+  calculates an exact pairwise matching between 'A' & 'B'.
+  If length(A) < length(B) then some elements of 'B' will
+  not be matched. If length(A) > length(B) then some
+  elements of 'B' will be matched more than once.
+  Alternatively, if the 'onto' parameter is set to FALSE
+  then each element of 'A' will be matched with the most
+  similar element of 'B' regardless of whether or not that
+  element is matched by another element of 'A'.
+}
+\author{
+  Ben Veal
+}
+
