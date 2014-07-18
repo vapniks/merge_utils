@@ -1,4 +1,4 @@
-Package: merge_utils
+Package: mergeutils
 Type: Package
 Title: Functions to aid merging disparate data
 Version: 1.0
