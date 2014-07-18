@@ -1,4 +1,4 @@
-.packageName <- "munge_utils"
+.packageName <- "mergeutils"
 
 ##' @title Find complete cases/rows of data.frame with respect to a set of variables.
 ##' @details The row numbers of 'df' for which there are no missing values in any of the columns indicated by '...' are
