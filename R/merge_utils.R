@@ -404,7 +404,7 @@ colwise2 <- function(.fun,.cols=true,...)
 ##' @details This function tries to match the strings in 'A' to the closest ones in 'B'.
 ##' By default it tries to ensure that every element of 'B' is matched by at least one element of 'A'.
 ##' So if 'A' and 'B' have the same length it calculates an exact pairwise matching between 'A' & 'B'.
-##' If length(A) < length(B) then some elements of 'B' will not be matched. 
+##' If length(A) < length(B) then some elements of 'B' will not be matched.
 ##' If length(A) > length(B) then some elements of 'B' will be matched more than once.
 ##' Alternatively, if the 'onto' parameter is set to FALSE then each element of 'A' will be matched with the
 ##' most similar element of 'B' regardless of whether or not that element is matched by another element of 'A'.
@@ -473,4 +473,217 @@ matchByDistance <- function(distMat,onto=TRUE)
         }
     return(row2col)
 }
+
+##' @title Perform sanity checks on a single variable.
+##' @details This function can be used after performing some data munging to check for mistakes.
+##' 
+##' You can check the data type, length, max, min, unique, or missing values.
+##' You can also supply your own function to check the variable.
+##' For the 'min_uniq', 'max_uniq' and 'max_na' variables, you can supply either a whole number indicating
+##' the number of cases, or a number between 0 & 1 representing a proportion of cases.
+##' 
+##' Note: if you need to repeatedly call the function on the same dataframe you can curry the data argument using
+##' the CurryL function in the functional library, e.g: checkalldata <- CurryL(checkVar,data=alldata)
+##' (it wont work with the non-lazy Curry function). To apply the function to all variables in a dataframe use the
+##' \code{\link{apply}} or \code{\link{checkDF}} functions.
+##' @param var the variable to check (or it's name as a string if the data arg is supplied)
+##' @param data an optional dataframe containing the variable (otherwise 'var' is taken from the calling environment)
+##' @param type (optional) type of the variable (compared with typeof(var)), or can be "numeric" to check for either
+##' "integer" or "double"
+##' @param min_len (optional) minimum length of the variable (compared with length(var))
+##' @param max_len (optional) maximum length of the variable (compared with length(var))
+##' @param min (optional), minimum allowed value (compared with min(var))
+##' @param max (optional), maximum allowed value (compared with max(var))
+##' @param vals (optional), list of all unique non missing values (compared with uniqueNotNA(var))
+##' @param valstype (optional) used in conjunction with 'vals'. If "all" (default) then 'vals' should contain all the same
+##' items as uniqueNotNA(var), if "subset"/"superset" then 'vals' should be a subset/superset of uniqueNotNA(var)
+##' @param min_uniq (optional) minimum number of unique values (compare with length(unique(var)))
+##' @param max_uniq (optional) maximum number of unique values (compare with length(unique(var)))
+##' @param max_na (optional) maximum number of missing values (compare with sum(is.na(var)))
+##' @param pred (optional) A function which takes a variable as input and returns TRUE/FALSE depending on whether the
+##' variable is valid or not.
+##' @param silent (optional) if TRUE then don't omit warning messages informing of error type (FALSE by default)
+##' @param stoponfail (optional) if TRUE then throw an error on the first check that fails (FALSE by default)
+##' @return TRUE if all checks passed, FALSE otherwise.
+##' @seealso \code{\link{checkDF}}, \code{\link{CurryL}}, \code{\link{apply}}
+##' @examples # create a function for checking variables in "ChickWeight" dataframe
+##' checkalldata <- CurryL(checkVar,data=ChickWeight)
+##' checkalldata(weight,type="numeric")
+##' # check each and every variable of dataframe
+##' apply(ChickWeight,2,function(x){checkVar(x,type="numeric")})
+##' @author Ben Veal
+##' @export
+checkVar <- function(var,data,type,min_len,max_len,min,max,vals,valstype="all",
+                     min_uniq,max_uniq,max_na,pred,silent=FALSE,stoponfail=FALSE)
+{
+    subvar <- substitute(var)
+    if(is.symbol(subvar))
+        varname <- deparse(subvar)
+    else if(is.character(subvar) & length(subvar)==1)
+        varname <- var
+    else varname <- "unknown"
+    if(!missing(data)) var <- data[[varname]]
+    actualtype <- typeof(var)
+    isnumeric <- actualtype %in% c("double","integer","numeric")
+    len <- length(var)
+    ok <- TRUE
+    # useful macros to save some typing
+    report <- defmacro(str,expr={msg <- paste(str,"for",varname);
+                                 if(stoponfail) stop(msg);
+                                 if(!silent) print(msg);
+                                 ok <- FALSE})
+    mintest <- defmacro(val,tot,min,str,expr={if(val < min | (min <= 1 & val/tot < min)) report(str)})
+    maxtest <- defmacro(val,tot,max,str,expr={if(val/tot > max | (max >= 1 & val > max)) report(str)})
+    # perform the checks
+    if(!missing(type))
+        {
+            if(!((type=="numeric" & isnumeric)|(type==actualtype)))
+                report(paste0("Expected '",type,"' type but got '",actualtype,"' type"))
+        }
+    if(!missing(min_len))
+        mintest(len,1,min_len,paste("Length is <",min_len))
+    if(!missing(max_len))
+        maxtest(len,1,max_len,paste("Length is >",max_len))
+    if(!isnumeric & (!missing(min) | !missing(max)))
+        report(paste0("Expected numeric type, but got '",actualtype,"' type"))
+    if(isnumeric & !missing(min))
+        mintest(min(var,na.rm=TRUE),1,min,paste("Found values <",as.character(min)))
+    if(isnumeric & !missing(max))
+        maxtest(max(var,na.rm=TRUE),1,max,paste("Found values >",as.character(max)))
+    if(!missing(vals)|!missing(min_uniq)|!missing(max_uniq))
+        {
+            uvals <- uniqueNotNA(var)
+            ulen <- length(uvals)
+            if(!missing(vals))
+                {
+                    vals <- uniqueNotNA(vals)                    
+                    if((valstype=="all" & !setequal(vals,uvals))
+                       |(valstype=="subset" & !(all(vals %in% uvals)))
+                       |(valstype=="superset" & !(all(uvals %in% vals))))
+                        report("Invalid values")
+                }
+            if(!missing(min_uniq))
+                mintest(ulen,len,min_uniq,"Not enough unique values")
+            if(!missing(max_uniq))
+                maxtest(ulen,len,max_uniq,"Too many unique values")
+        }
+    if(!missing(max_na))
+        maxtest(sum(is.na(var)),len,max_na,"Too many missing values")
+    if(!missing(pred))
+        {
+            if(!pred(var))
+                report(paste(deparse(substitute(pred)),"returns false"))
+        }
+    if(ok & !silent) print(paste("All checks passed for",varname,"variable"))
+    return(ok)
+}
+
+##' @title Perform sanity checks on a dataframe. 
+##' @details This function can be used after performing some data munging to check for mistakes.
+##' 
+##' You can restrict the checks to a subset of the dataframe by supplying a logical expression in the 'subset'
+##' argument. This expression will be evaluated in the context of the supplied dataframe (the 'data' argument),
+##' so you don't need to qualify the variable names. If all arguments apart from 'data', 'subset', 'silent' and 'stoponfail'
+##' are unset/NULL then the function will check if all rows satisfy the subset logical expression (unless this is unset).
+##' The other arguments can used for checking the number of complete cases (i.e. rows with no missing values), unique cases,
+##' missing values, and variable specific checks (see below).
+##' 
+##' For arguments with names beginning with 'min_' or 'max_' you can supply either a whole number indicating
+##' an amount of rows/columns, or a number between 0 & 1 indicating a proportion of rows/columns.
+##' For 'min_rows' & 'max_rows' proportions are interpreted as proportions of the whole data (before subsetting),
+##' whereas for other arguments proportions are interpreted as proportions of the subsetted data.
+##'
+##' To perform variable specific checks you can supply named argument where the names are regexp strings matching the names
+##' of the corresponding variables to check, and the values are argument lists to pass on to \code{\link{checkVar}}
+##' (which see). For example to check that each variable with "country" in its name is of type "character" and has
+##' between 10 and 300 unique values, use this argument: "country"=list(type="character",min_uniq=10,max_uniq=300)
+##' To ensure that a regexp matches only a single variable put a ^ at the front and $ at the end (e.g. "^country$").
+##' You can supply as many of these variable specific arguments as you want. Note that you do not need to supply the
+##' 'var' or 'data' arguments in the argument list for \code{\link{checkVar}}.
+##' 
+##' By default a warning message will be issued when a check fails. This can be prevented by setting 'silent' to TRUE.
+##' If the 'stoponfail' argument is set to TRUE then an error will be thrown on the first check that fails,
+##' otherwise the return value of the function indicates whether all checks passed (TRUE) or not (FALSE).
+##' @param data dataframe to be checked
+##' @param subset (optional) logical expression indicating subset of 'data' to check (see \code{\link{subset}})
+##' @param min_rows (optional) minimum number of rows (compare with dim(data[subset,])[1]). 
+##' @param max_rows (optional) maximum number of rows (compare with dim(data[subset,])[1])
+##' @param min_cc (optional) minimum number of complete cases (compare with sum(complete.cases(data[subset,])))
+##' @param max_cc (optional) maximum number of complete cases (compare with sum(complete.cases(data[subset,])))
+##' @param min_uniq (optional) minimum number of unique cases (compare with dim(unique(data[subset,]))[1]). Default value is 1.
+##' @param max_uniq (optional) maximum number of unique cases (compare with dim(unique(data[subset,]))[1])
+##' @param max_na_row (optional) maximum number of missing values for each row
+##' @param max_na_all (optional) maximum number of missing values overall
+##' @param silent (optional) if TRUE then don't omit warning messages informing of error type (FALSE by default)
+##' @param stoponfail (optional) if TRUE then throw an error on the first check that fails (FALSE by default)
+##' @param ... (optional) additional variable specific arguments (see below)
+##' @return TRUE if all checks passed, FALSE otherwise
+##' @examples checkDF(ChickWeight,weight>Time)
+##' checkDF(ChickWeight,min_uniq=10)
+##' @seealso \code{\link{checkVar}}
+##' @author Ben Veal
+##' @export 
+checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uniq,
+                    max_na_row,max_na_all,silent=FALSE,stoponfail=FALSE,...)
+{
+    nrows1 <- dim(data)[1]
+    framename <- deparse(substitute(data))
+    subsetstr <- deparse(substitute(subset))
+    varargs <- list(...)
+    if(subsetstr!="")
+        {
+            data <- data[with(data,eval(parse(text=subsetstr))),]
+            subsetmsg <- paste0("rows satisfying '",subsetstr,"'")
+        }
+    else subsetmsg <- "rows"
+    nrows2 <- dim(data)[1]
+    ncols2 <- dim(data)[2]
+    ok <- TRUE
+    # useful macros to save some typing
+    report <- defmacro(str,expr={msg <- paste(str,"for",framename,"dataframe");
+                                 if(stoponfail) stop(msg);
+                                 if(!silent) print(msg);
+                                 ok <- FALSE})
+    mintest <- defmacro(val,tot,min,str,expr={if(val < min | (min <= 1 & val/tot < min)) report(paste("Not enough",str))})
+    maxtest <- defmacro(val,tot,max,str,expr={if(val/tot > max | (max >= 1 & val > max)) report(paste("Too many",str))})
+    # do dataframe wide checks
+    if(!missing(min_rows))
+        mintest(nrows2,nrows1,min_rows,subsetmsg)
+    # if only the 'subset' & 'data' args are supplied then just check that all rows satisfy the 'subset' expression
+    else if(subsetstr!="" & missing(max_rows) & missing(min_cc) & missing(max_cc) & missing(min_uniq) & missing(max_uniq)
+             & missing(max_na_row) & missing(max_na_all) & length(varargs)==0)
+        mintest(nrows2,nrows1,nrows1,subsetmsg)
+    if(!missing(max_rows))
+        maxtest(nrows2,nrows1,max_rows,subsetmsg)
+    if(!missing(min_cc))
+        mintest(sum(complete.cases(data)),nrows2,min_cc,"complete cases")
+    if(!missing(max_cc))
+        maxtest(sum(complete.cases(data)),nrows2,max_cc,"complete cases")
+    if(!missing(min_uniq))
+        mintest(dim(unique(data))[1],nrows2,min_uniq,"unique cases")
+    if(!missing(max_uniq))
+        maxtest(dim(unique(data))[1],nrows2,max_uniq,"unique cases")
+    if(!missing(max_na_row))
+        {
+            whichrows <- which(!apply(data,2,function(x){checkVar(x,max_na=max_na_row)}))
+            if(length(whichrows) > 0)
+                {
+                    report("Too many missing values in rows")
+                    whichrows[1:min(length(whichrows),10)]
+                }
+        }
+    if(!missing(max_na_all))
+        maxtest(sum(is.na(data)),nrows2*ncols2,max_na_all,"missing values")
+    # do variable specific checks
+    varnames <- names(data)
+    if(length(varargs) > 0)
+        for(i in 1:length(varargs))
+            for(j in grep(names(varargs)[i],varnames))
+                if(with(data,!do.call(checkVar,args=c(var=as.symbol(varnames[j]),varargs[[i]]))))
+                    x <- FALSE
+    # finished all checks
+    if(ok & !silent) print(paste("All checks passed for",framename,"dataframe"))
+    return(ok)
+}
+
 
