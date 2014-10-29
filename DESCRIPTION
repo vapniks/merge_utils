@@ -1,8 +1,8 @@
 Package: mergeutils
 Type: Package
 Title: Functions to aid merging disparate data
-Version: 1.0
-Date: 2014-07-17
+Version: 1.1
+Date: 2014-10-29
 Author: Ben Veal
 Maintainer: Who to complain to <benveal92@gmail.com>
 Description: Functions to aid merging disparate data
@@ -14,4 +14,3 @@ Depends:
     car,
     doBy,
     stringdist
-    
