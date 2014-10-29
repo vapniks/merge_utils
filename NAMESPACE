@@ -1,3 +1,5 @@
+export(checkDF)
+export(checkVar)
 export(colwise2)
 export(complete.cases2)
 export(contents)
