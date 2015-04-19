@@ -4,8 +4,8 @@
 \alias{checkVar}
 \title{Perform sanity checks on a single variable.}
 \usage{
-checkVar(var, data, typeof, class, mode, min_len, max_len, min, max, vals,
-  valstype = "all", min_uniq, max_uniq, max_na, pred, silent = FALSE,
+checkVar(var, data, vartype, varclass, varmode, min_len, max_len, min, max,
+  vals, valstype = "all", min_uniq, max_uniq, max_na, pred, silent = FALSE,
   stoponfail = FALSE)
 }
 \arguments{
@@ -13,11 +13,11 @@ checkVar(var, data, typeof, class, mode, min_len, max_len, min, max, vals,
 
 \item{data}{an optional dataframe containing the variable (otherwise 'var' is taken from the calling environment)}
 
-\item{typeof}{(optional) type of the variable (compared with typeof(var))}
+\item{vartype}{(optional) type of the variable (compared with typeof(var))}
 
-\item{class}{(optional) class of the variable (compared with class(var), matches if arg is %in% class(var))}
+\item{varclass}{(optional) class of the variable (compared with class(var), matches if arg is %in% class(var))}
 
-\item{mode}{(optional) mode of the variable (compared with mode(var))}
+\item{varmode}{(optional) mode of the variable (compared with mode(var))}
 
 \item{min_len}{(optional) minimum length of the variable (compared with length(var))}
 
@@ -67,9 +67,9 @@ the CurryL function in the functional library, e.g: checkalldata <- CurryL(check
 \examples{
 # create a function for checking variables in "ChickWeight" dataframe
 checkalldata <- CurryL(checkVar,data=ChickWeight)
-checkalldata(weight,type="numeric")
+checkalldata(weight,vartype="numeric")
 # check each and every variable of dataframe
-apply(ChickWeight,2,function(x){checkVar(x,type="numeric")})
+apply(ChickWeight,2,function(x){checkVar(x,vartype="numeric")})
 }
 \author{
 Ben Veal
