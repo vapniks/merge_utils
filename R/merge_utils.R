@@ -622,7 +622,7 @@ checkVar <- function(var,data,type,min_len,max_len,min,max,vals,valstype="all",
 ##' @param vars (optional) either a numeric or character vector, or a regexp matching names of variables to check
 ##' @param checks (optional) a list of a arguments to be passed to \code{\link{checkVar}}
 ##' @return TRUE if all checks passed, FALSE otherwise
-##' @examples checkDF(ChickWeight,weight>Time)
+##' @examples checkDF(ChickWeight,weight>time)
 ##' checkDF(ChickWeight,min_uniq=10)
 ##' @seealso \code{\link{checkVar}}
 ##' @author Ben Veal
