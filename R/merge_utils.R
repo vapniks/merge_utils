@@ -477,7 +477,7 @@ matchByDistance <- function(distMat,onto=TRUE)
 ##' @title Perform sanity checks on a single variable.
 ##' @details This function can be used after performing some data munging to check for mistakes.
 ##' 
-##' You can check the data type, length, max, min, unique, or missing values.
+##' You can check the data type, class, mode, length, max, min, unique, or missing values.
 ##' You can also supply your own function to check the variable.
 ##' For the 'min_uniq', 'max_uniq' and 'max_na' variables, you can supply either a whole number indicating
 ##' the number of cases, or a number between 0 & 1 representing a proportion of cases.
@@ -488,8 +488,9 @@ matchByDistance <- function(distMat,onto=TRUE)
 ##' \code{\link{apply}} or \code{\link{checkDF}} functions.
 ##' @param var the variable to check (or it's name as a string if the data arg is supplied)
 ##' @param data an optional dataframe containing the variable (otherwise 'var' is taken from the calling environment)
-##' @param type (optional) type of the variable (compared with typeof(var)), or can be "numeric" to check for either
-##' "integer" or "double"
+##' @param typeof (optional) type of the variable (compared with typeof(var))
+##' @param class (optional) class of the variable (compared with class(var))
+##' @param mode (optional) mode of the variable (compared with mode(var))
 ##' @param min_len (optional) minimum length of the variable (compared with length(var))
 ##' @param max_len (optional) maximum length of the variable (compared with length(var))
 ##' @param min (optional), minimum allowed value (compared with min(var))
@@ -513,7 +514,7 @@ matchByDistance <- function(distMat,onto=TRUE)
 ##' apply(ChickWeight,2,function(x){checkVar(x,type="numeric")})
 ##' @author Ben Veal
 ##' @export
-checkVar <- function(var,data,type,min_len,max_len,min,max,vals,valstype="all",
+checkVar <- function(var,data,typeof,class,mode,min_len,max_len,min,max,vals,valstype="all",
                      min_uniq,max_uniq,max_na,pred,silent=FALSE,stoponfail=FALSE)
 {
     subvar <- substitute(var)
@@ -523,8 +524,7 @@ checkVar <- function(var,data,type,min_len,max_len,min,max,vals,valstype="all",
         varname <- var
     else varname <- "unknown"
     if(!missing(data)) var <- data[[varname]]
-    actualtype <- typeof(var)
-    isnumeric <- actualtype %in% c("double","integer","numeric")
+    isnumeric <- mode(var)=="numeric"
     len <- length(var)
     ok <- TRUE
     # useful macros to save some typing
@@ -535,17 +535,21 @@ checkVar <- function(var,data,type,min_len,max_len,min,max,vals,valstype="all",
     mintest <- defmacro(val,tot,min,str,expr={if(val < min | (min <= 1 & val/tot < min)) report(str)})
     maxtest <- defmacro(val,tot,max,str,expr={if(val/tot > max | (max >= 1 & val > max)) report(str)})
     # perform the checks
-    if(!missing(type))
-        {
-            if(!((type=="numeric" & isnumeric)|(type==actualtype)))
-                report(paste0("Expected '",type,"' type but got '",actualtype,"' type"))
-        }
+    if(!missing(typeof))
+        if(!(typeof==typeof(var)))
+            report(paste0("Expected '",typeof,"' type but got '",typeof(var),"' type"))
+    if(!isnumeric & (!missing(min) | !missing(max)))
+        report(paste0("Expected numeric type, but got '",mode(var),"' type"))
+    if(!missing(class))
+        if(!(class==class(var)))
+            report(paste0("Expected '",class,"' class but got '",class(var),"' class"))
+    if(!missing(mode))
+        if(!(mode==mode(var)))
+            report(paste0("Expected '",mode,"' mode but got '",mode(var),"' mode"))
     if(!missing(min_len))
         mintest(len,1,min_len,paste("Length is <",min_len))
     if(!missing(max_len))
         maxtest(len,1,max_len,paste("Length is >",max_len))
-    if(!isnumeric & (!missing(min) | !missing(max)))
-        report(paste0("Expected numeric type, but got '",actualtype,"' type"))
     if(isnumeric & !missing(min))
         mintest(min(var,na.rm=TRUE),1,min,paste("Found values <",as.character(min)))
     if(isnumeric & !missing(max))
