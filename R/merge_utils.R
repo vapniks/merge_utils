@@ -628,7 +628,7 @@ checkVar <- function(var,data,type,min_len,max_len,min,max,vals,valstype="all",
 ##' @author Ben Veal
 ##' @export 
 checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uniq,
-                    max_na_row,max_na_all,silent=FALSE,stoponfail=FALSE,vars=NULL,check=NULL)
+                    max_na_row,max_na_all,silent=FALSE,stoponfail=FALSE,vars=NULL,checks=NULL)
 {
     nrows1 <- dim(data)[1]
     framename <- deparse(substitute(data))
@@ -683,7 +683,7 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
         for(i in 1:length(vars)) {
             ## first get the appropriate column numbers 
             if(class(vars[i])=="character") cols <- grep(vars[i],varnames)
-            else if(class(vars[i])=="numeric") cols <- vars[i]
+            else cols <- vars[i]
             ## now check each column
             for(j in cols)
                 if(with(data,!do.call(checkVar,args=c(var=as.symbol(varnames[j]),checks))))
