@@ -488,9 +488,9 @@ matchByDistance <- function(distMat,onto=TRUE)
 ##' \code{\link{apply}} or \code{\link{checkDF}} functions.
 ##' @param var the variable to check (or it's name as a string if the data arg is supplied)
 ##' @param data an optional dataframe containing the variable (otherwise 'var' is taken from the calling environment)
-##' @param typeof (optional) type of the variable (compared with typeof(var))
-##' @param class (optional) class of the variable (compared with class(var), matches if arg is %in% class(var))
-##' @param mode (optional) mode of the variable (compared with mode(var))
+##' @param vartype (optional) type of the variable (compared with typeof(var))
+##' @param varclass (optional) class of the variable (compared with class(var), matches if arg is %in% class(var))
+##' @param varmode (optional) mode of the variable (compared with mode(var))
 ##' @param min_len (optional) minimum length of the variable (compared with length(var))
 ##' @param max_len (optional) maximum length of the variable (compared with length(var))
 ##' @param min (optional), minimum allowed value (compared with min(var))
@@ -509,12 +509,12 @@ matchByDistance <- function(distMat,onto=TRUE)
 ##' @seealso \code{\link{checkDF}}, \code{\link{CurryL}}, \code{\link{apply}}
 ##' @examples # create a function for checking variables in "ChickWeight" dataframe
 ##' checkalldata <- CurryL(checkVar,data=ChickWeight)
-##' checkalldata(weight,type="numeric")
+##' checkalldata(weight,vartype="numeric")
 ##' # check each and every variable of dataframe
-##' apply(ChickWeight,2,function(x){checkVar(x,type="numeric")})
+##' apply(ChickWeight,2,function(x){checkVar(x,vartype="numeric")})
 ##' @author Ben Veal
 ##' @export
-checkVar <- function(var,data,typeof,class,mode,min_len,max_len,min,max,vals,valstype="all",
+checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,vals,valstype="all",
                      min_uniq,max_uniq,max_na,pred,silent=FALSE,stoponfail=FALSE)
 {
     subvar <- substitute(var)
@@ -524,7 +524,7 @@ checkVar <- function(var,data,typeof,class,mode,min_len,max_len,min,max,vals,val
         varname <- var
     else varname <- "unknown"
     if(!missing(data)) var <- data[[varname]]
-    isnumeric <- mode(var)=="numeric"
+    isnumeric <- mode(var) == "numeric"
     len <- length(var)
     ok <- TRUE
     # useful macros to save some typing
@@ -535,17 +535,17 @@ checkVar <- function(var,data,typeof,class,mode,min_len,max_len,min,max,vals,val
     mintest <- defmacro(val,tot,min,str,expr={if(val < min | (min <= 1 & val/tot < min)) report(str)})
     maxtest <- defmacro(val,tot,max,str,expr={if(val/tot > max | (max >= 1 & val > max)) report(str)})
     # perform the checks
-    if(!missing(typeof))
-        if(!(typeof==typeof(var)))
-            report(paste0("Expected '",typeof,"' type but got '",typeof(var),"' type"))
+    if(!missing(vartype))
+        if(!(vartype==typeof(var)))
+            report(paste0("Expected '",vartype,"' type but got '",typeof(var),"' type"))
     if(!isnumeric & (!missing(min) | !missing(max)))
         report(paste0("Expected numeric type, but got '",mode(var),"' type"))
-    if(!missing(class))
-        if(!(class %in% class(var)))
-            report(paste0("Expected '",class,"' class but got '",class(var),"' class"))
-    if(!missing(mode))
-        if(!(mode==mode(var)))
-            report(paste0("Expected '",mode,"' mode but got '",mode(var),"' mode"))
+    if(!missing(varclass))
+        if(!(varclass %in% class(var)))
+            report(paste0("Expected '",varclass,"' class but got '",class(var),"' class"))
+    if(!missing(varmode))
+        if(!(varmode==mode(var)))
+            report(paste0("Expected '",varmode,"' mode but got '",mode(var),"' mode"))
     if(!missing(min_len))
         mintest(len,1,min_len,paste("Length is <",min_len))
     if(!missing(max_len))
