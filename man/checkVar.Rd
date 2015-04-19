@@ -4,16 +4,20 @@
 \alias{checkVar}
 \title{Perform sanity checks on a single variable.}
 \usage{
-checkVar(var, data, type, min_len, max_len, min, max, vals, valstype = "all",
-  min_uniq, max_uniq, max_na, pred, silent = FALSE, stoponfail = FALSE)
+checkVar(var, data, typeof, class, mode, min_len, max_len, min, max, vals,
+  valstype = "all", min_uniq, max_uniq, max_na, pred, silent = FALSE,
+  stoponfail = FALSE)
 }
 \arguments{
 \item{var}{the variable to check (or it's name as a string if the data arg is supplied)}
 
 \item{data}{an optional dataframe containing the variable (otherwise 'var' is taken from the calling environment)}
 
-\item{type}{(optional) type of the variable (compared with typeof(var)), or can be "numeric" to check for either
-"integer" or "double"}
+\item{typeof}{(optional) type of the variable (compared with typeof(var))}
+
+\item{class}{(optional) class of the variable (compared with class(var))}
+
+\item{mode}{(optional) mode of the variable (compared with mode(var))}
 
 \item{min_len}{(optional) minimum length of the variable (compared with length(var))}
 
@@ -50,7 +54,7 @@ Perform sanity checks on a single variable.
 \details{
 This function can be used after performing some data munging to check for mistakes.
 
-You can check the data type, length, max, min, unique, or missing values.
+You can check the data type, class, mode, length, max, min, unique, or missing values.
 You can also supply your own function to check the variable.
 For the 'min_uniq', 'max_uniq' and 'max_na' variables, you can supply either a whole number indicating
 the number of cases, or a number between 0 & 1 representing a proportion of cases.
