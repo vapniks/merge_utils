@@ -13,4 +13,5 @@ Depends:
     plyr,
     car,
     doBy,
-    stringdist
+    stringdist,
+    gtools
