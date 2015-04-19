@@ -593,13 +593,16 @@ checkVar <- function(var,data,type,min_len,max_len,min,max,vals,valstype="all",
 ##' For 'min_rows' & 'max_rows' proportions are interpreted as proportions of the whole data (before subsetting),
 ##' whereas for other arguments proportions are interpreted as proportions of the subsetted data.
 ##'
-##' To perform variable specific checks you can supply named argument where the names are regexp strings matching the names
-##' of the corresponding variables to check, and the values are argument lists to pass on to \code{\link{checkVar}}
-##' (which see). For example to check that each variable with "country" in its name is of type "character" and has
-##' between 10 and 300 unique values, use this argument: "country"=list(type="character",min_uniq=10,max_uniq=300)
+##' To perform variable specific checks use the 'vars' argument to specify which variables to check. 'vars' can be
+##' either a numeric vector of column numbers, or a character vector of regexps matching column names. The matching
+##' columns will be individually checked by the \code{\link{checkVar}} function. To specify which checks to perform
+##' supply a list of arguments for \code{\link{checkVar}} in the 'checks' argument. You do not need to include the data
+##' or var arguments in this list. For example to check that all variables with names matching "country" or "name" have
+##' type "character" and between 10 & 300 unique values you could do:
+##' 
+##' checkDF(data,vars=c("country","name"),checks=list(type="character",min_uniq=10,max_uniq=300))
+##' 
 ##' To ensure that a regexp matches only a single variable put a ^ at the front and $ at the end (e.g. "^country$").
-##' You can supply as many of these variable specific arguments as you want. Note that you do not need to supply the
-##' 'var' or 'data' arguments in the argument list for \code{\link{checkVar}}.
 ##' 
 ##' By default a warning message will be issued when a check fails. This can be prevented by setting 'silent' to TRUE.
 ##' If the 'stoponfail' argument is set to TRUE then an error will be thrown on the first check that fails,
@@ -616,7 +619,8 @@ checkVar <- function(var,data,type,min_len,max_len,min,max,vals,valstype="all",
 ##' @param max_na_all (optional) maximum number of missing values overall
 ##' @param silent (optional) if TRUE then don't omit warning messages informing of error type (FALSE by default)
 ##' @param stoponfail (optional) if TRUE then throw an error on the first check that fails (FALSE by default)
-##' @param ... (optional) additional variable specific arguments (see below)
+##' @param vars (optional) either a numeric or character vector, or a regexp matching names of variables to check
+##' @param checks (optional) a list of a arguments to be passed to \code{\link{checkVar}}
 ##' @return TRUE if all checks passed, FALSE otherwise
 ##' @examples checkDF(ChickWeight,weight>Time)
 ##' checkDF(ChickWeight,min_uniq=10)
@@ -624,12 +628,11 @@ checkVar <- function(var,data,type,min_len,max_len,min,max,vals,valstype="all",
 ##' @author Ben Veal
 ##' @export 
 checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uniq,
-                    max_na_row,max_na_all,silent=FALSE,stoponfail=FALSE,...)
+                    max_na_row,max_na_all,silent=FALSE,stoponfail=FALSE,vars=NULL,check=NULL)
 {
     nrows1 <- dim(data)[1]
     framename <- deparse(substitute(data))
     subsetstr <- deparse(substitute(subset))
-    varargs <- list(...)
     if(subsetstr!="")
         {
             data <- data[with(data,eval(parse(text=subsetstr))),]
@@ -651,7 +654,7 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
         mintest(nrows2,nrows1,min_rows,subsetmsg)
     # if only the 'subset' & 'data' args are supplied then just check that all rows satisfy the 'subset' expression
     else if(subsetstr!="" & missing(max_rows) & missing(min_cc) & missing(max_cc) & missing(min_uniq) & missing(max_uniq)
-             & missing(max_na_row) & missing(max_na_all) & length(varargs)==0)
+             & missing(max_na_row) & missing(max_na_all) & length(vars)==0)
         mintest(nrows2,nrows1,nrows1,subsetmsg)
     if(!missing(max_rows))
         maxtest(nrows2,nrows1,max_rows,subsetmsg)
@@ -676,11 +679,16 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
         maxtest(sum(is.na(data)),nrows2*ncols2,max_na_all,"missing values")
     # do variable specific checks
     varnames <- names(data)
-    if(length(varargs) > 0)
-        for(i in 1:length(varargs))
-            for(j in grep(names(varargs)[i],varnames))
-                if(with(data,!do.call(checkVar,args=c(var=as.symbol(varnames[j]),varargs[[i]]))))
-                    x <- FALSE
+    if(length(vars) > 0)
+        for(i in 1:length(vars)) {
+            ## first get the appropriate column numbers 
+            if(class(vars[i])=="character") cols <- grep(vars[i],varnames)
+            else if(class(vars[i])=="numeric") cols <- vars[i]
+            ## now check each column
+            for(j in cols)
+                if(with(data,!do.call(checkVar,args=c(var=as.symbol(varnames[j]),checks))))
+                    ok <- FALSE 
+        }
     # finished all checks
     if(ok & !silent) print(paste("All checks passed for",framename,"dataframe"))
     return(ok)
