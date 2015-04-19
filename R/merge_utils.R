@@ -603,6 +603,8 @@ checkVar <- function(var,data,type,min_len,max_len,min,max,vals,valstype="all",
 ##' checkDF(data,vars=c("country","name"),checks=list(type="character",min_uniq=10,max_uniq=300))
 ##' 
 ##' To ensure that a regexp matches only a single variable put a ^ at the front and $ at the end (e.g. "^country$").
+##' Note: the values of the 'silent' and 'stoponfail' args will be passed on the \code{\link{checkVar}} by default
+##' but you can override these values by passing new values in the 'checks' arg.
 ##' 
 ##' By default a warning message will be issued when a check fails. This can be prevented by setting 'silent' to TRUE.
 ##' If the 'stoponfail' argument is set to TRUE then an error will be thrown on the first check that fails,
@@ -679,7 +681,11 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
         maxtest(sum(is.na(data)),nrows2*ncols2,max_na_all,"missing values")
     # do variable specific checks
     varnames <- names(data)
-    if(length(vars) > 0)
+    if(length(vars) > 0 & length(checks) > 0) {
+        if(!("silent" %in% names(checks)))
+            checks <- c(checks,silent=silent)
+        if(!("stoponfail" %in% names(checks)))
+            checks <- c(checks,stoponfail=stoponfail)
         for(i in 1:length(vars)) {
             ## first get the appropriate column numbers 
             if(class(vars[i])=="character") cols <- grep(vars[i],varnames)
@@ -689,6 +695,7 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
                 if(with(data,!do.call(checkVar,args=c(var=as.symbol(varnames[j]),checks))))
                     ok <- FALSE 
         }
+    }
     # finished all checks
     if(ok & !silent) print(paste("All checks passed for",framename,"dataframe"))
     return(ok)
