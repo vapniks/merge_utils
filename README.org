@@ -2,41 +2,24 @@
 Functions to aid merging and recoding multiple sets of data, and checking data integrity.
 
 ** Index
-
-checkDF                 Perform sanity checks on a dataframe.
-checkVar                Perform sanity checks on a single variable.
-colwise2                Like 'colwise', but the returned function will
-                        return unaffected columns alongside affected
-                        ones if possible.
-complete.cases2         Find complete cases/rows of data.frame with
-                        respect to a set of variables.
-contents                Find contents of variables/factors - either
-                        "numeric", "logical" or "character"
-is.character.contents   Test if contents of vector are character/string
-                        values.
-is.logical.contents     Test if contents of vector are logical
-                        (TRUE/FALSE) values.
-is.numeric.contents     Test if contents of vector are numeric values.
-matchByDistance         Match elements of one set with closest elements
-                        of another set, according to their mutual
-                        distances.
-matchStrings            Match strings in A with strings in B
-multimerge              Merge multiple dataframe by common columns.
-recodeAs                Recode unique values of one variable to match
-                        unique values of another variable.
-recodeDF                Recode collection of variables so that they all
-                        the same unique values.
-recodeDFas              Recode variables in dataframe to match codes in
-                        another dataframe
-recodeMatches           Recode values of variable/factor matching
-                        patterns
-recodeReverse           Recode an ordered variable by reversing the
-                        codes.
-unfactor                Convert factors into numeric/character/logical
-                        vectors.
-uniqueNotNA             Like 'unique' but omits NA's or NaN's,
-                        suppresses warnings, and returns result as
-                        character vector.
+| checkDF               | Perform sanity checks on a dataframe.                                                                         |
+| checkVar              | Perform sanity checks on a single variable.                                                                   |
+| colwise2              | Like 'colwise', but the returned function will return unaffected columns alongside affected ones if possible. |
+| complete.cases2       | Find complete cases/rows of data.frame with respect to a set of variables.                                    |
+| contents              | Find contents of variables/factors - either "numeric", "logical" or "character"                               |
+| is.character.contents | Test if contents of vector are character/string values.                                                       |
+| is.logical.contents   | Test if contents of vector are logical (TRUE/FALSE) values.                                                   |
+| is.numeric.contents   | Test if contents of vector are numeric values.                                                                |
+| matchByDistance       | Match elements of one set with closest elements of another set, according to their mutual distances.          |
+| matchStrings          | Match strings in A with strings in B                                                                          |
+| multimerge            | Merge multiple dataframe by common columns.                                                                   |
+| recodeAs              | Recode unique values of one variable to match unique values of another variable.                              |
+| recodeDF              | Recode collection of variables so that they all the same unique values.                                       |
+| recodeDFas            | Recode variables in dataframe to match codes in another dataframe                                             |
+| recodeMatches         | Recode values of variable/factor matching patterns                                                            |
+| recodeReverse         | Recode an ordered variable by reversing the codes.                                                            |
+| unfactor              | Convert factors into numeric/character/logical vectors.                                                       |
+| uniqueNotNA           | Like 'unique' but omits NA's or NaN's, suppresses warnings, and returns result as character vector.           |
 
 
 
