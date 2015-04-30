@@ -15,7 +15,7 @@ checkVar(var, data, vartype, varclass, varmode, min_len, max_len, min, max,
 
 \item{vartype}{(optional) type of the variable (compared with typeof(var))}
 
-\item{varclass}{(optional) class of the variable (compared with class(var), matches if arg is %in% class(var))}
+\item{varclass}{(optional) class of the variable (compared with class(var), matches if arg is in class(var))}
 
 \item{varmode}{(optional) mode of the variable (compared with mode(var))}
 

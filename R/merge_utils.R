@@ -363,7 +363,7 @@ recodeDFas <- function(df1,df2,cols1,cols2=cols1)
             col2 <- ifelse(i<=length(cols2),cols2[i],last(cols2))
             x[,col1] <- recodeAs(df1[,col1],df2[,col2])
         }
-    x
+    return(x)
 }
 
 ##' @title Like \code{\link{colwise}}, but the returned function will return unaffected columns alongside affected ones
@@ -390,12 +390,12 @@ colwise2 <- function(.fun,.cols=true,...)
             if(dim(x)[1]==dim(df)[1])
                 {
                     df[,colnames] <- x
-                    df
+                    return(df)
                 }
             else
                 {
                     print("New columns incompatible with old ones")
-                    x
+                    return(x)
                 }
         }
 }
@@ -489,7 +489,7 @@ matchByDistance <- function(distMat,onto=TRUE)
 ##' @param var the variable to check (or it's name as a string if the data arg is supplied)
 ##' @param data an optional dataframe containing the variable (otherwise 'var' is taken from the calling environment)
 ##' @param vartype (optional) type of the variable (compared with typeof(var))
-##' @param varclass (optional) class of the variable (compared with class(var), matches if arg is %in% class(var))
+##' @param varclass (optional) class of the variable (compared with class(var), matches if arg is in class(var))
 ##' @param varmode (optional) mode of the variable (compared with mode(var))
 ##' @param min_len (optional) minimum length of the variable (compared with length(var))
 ##' @param max_len (optional) maximum length of the variable (compared with length(var))
