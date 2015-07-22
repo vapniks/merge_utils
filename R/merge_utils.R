@@ -56,52 +56,51 @@ complete.cases2 <- function(...,df)
 ##' @return A single dataframe containing the merged data.
 ##' @author Ben Veal
 ##' @export
-multimerge <- function(data,by,all=NULL,suffixes=NULL)
-{
+multimerge <- function(data,by,all=NULL,suffixes=NULL) {
     len <- length(data)
-    ## make sure all values in "by" are set
-    if(is.null(by))
-        Reduce(intersect)
-        by <- list()
-    for(i in 1:len)
+    ## If "by" is not supplied check dataframes for common variables,
+    ## and throw an error if there are none.
+    if(is.null(by)) by <- Reduce(intersect,Map(names,data))
+    if(length(by)==0) stop("No common variables!")
+    ## make sure there are names for all dataframes, and convert numeric variable indices to variable names
+    for(i in 1:len) {
         if(i > length(by)) by[[i]] <- by[[i-1]]
         else if(is.numeric(by[[i]]))
                  by[[i]] <- names(data[[i]])[by[[i]]]
-
-                
+    }
     ## append suffixes to conflicting column names
-    cols <- mapply(function(a,b){setdiff(names(a),ifelse(is.numeric(b),names(a)[b],b))},data,by,SIMPLIFY=FALSE)
-    for(i in 1:len)
-        {
-            
-            unique <- setdiff(names(data[[i]]),by[[i]])
-            dups <- intersect(cols[[i]],unlist(cols[-i]))
-            indices <- cols[[i]] %in% dups
-            if(length(suffixes) >= i && !is.na(suffixes[[i]]))
-                cols[[i]][indices] <- paste(cols[[i]][indices],suffixes[[i]],sep=".")
-            else cols[[i]][indices] <- paste(cols[[i]][indices],as.character(i),sep=".")
-        }
+    cols <- mapply(function(a,b){setdiff(names(a),b)},data,by,SIMPLIFY=FALSE)
+    for(i in 1:len) {
+        dups <- intersect(cols[[i]],unlist(cols[-i]))
+        indices <- cols[[i]] %in% dups
+        if(length(suffixes) >= i && !is.na(suffixes[[i]]))
+            cols[[i]][indices] <- paste(cols[[i]][indices],suffixes[[i]],sep=".")
+        else cols[[i]][indices] <- paste(cols[[i]][indices],as.character(i),sep=".")
+    }
     ## subset dataframes to appropriate rows according to values in "all" argument
     data2 <- list()
-    for(i in 1:len)
-        {
+    for(i in 1:len) {
             if(length(all) < i || is.null(all[[i]]) || all[[i]] == c(i))
-                data2[[i]] <- data[[i]]
-            else
+                keep <- 1:nrow(data[[i]])
+            else {
                 ## first need to find which rows to keep
-                keep <- rep(FALSE,dim(data[[i]])[1])
-                for(j in all[[i]])
-                    {
-                        ## loop over 'by' columns, filtering out non-matching rows each time
-                        for(k in 1:length(by[[i]]))
-                            keep <- keep & (data[[i]][,by[[i]][k]] %in% data[[j]][,by[[j]][k]])
-                        data2[[i]] <- data[[i]][keep,]
+                keep <- rep(TRUE,nrow(data[[i]]))
+                for(j in all[[i]]) {
+                    for(k in 1:nrow(data[[i]])) {
+                        r1 <- data[[i]][k,by[[i]]]
+                        r2 <- data[[j]][k,by[[j]]]
                     }
-        }
+                    ## loop over 'by' columns, filtering out non-matching rows each time
+                    for(k in 1:length(by[[i]]))
+                        keep <- keep & (data[[i]][,by[[i]]] %in% data[[j]][,by[[j]]])
+                    data2[[i]] <- data[[i]][keep,]
+                }
+            }
+            data2[[i]] <- data[[i]][keep,]
+    }
     ## finally, merge the data
     accum <- data2[[1]]
-    for(i in 2:len)
-        accum <- merge(accum,data2[[i]],by.x=by[[i-1]],by.y=by[[i]],suffixes=c())
+    for(i in 2:len) accum <- merge(accum,data2[[i]],by.x=by[[i-1]],by.y=by[[i]],suffixes=c())
     return(accum)
 }
 
@@ -324,7 +323,7 @@ recodeAs <- function(A,B)
     recodeVar(A,Avals,Bvals)
 }
 
-##' @title Recode collection of variables so that they all the same unique values.
+##' @title Recode collection of variables so that they all have the same unique values.
 ##' @details This is a wrapper around \code{\link{recodeMatches}} & \code{\link{recode}} (in library(car))
 ##' for recoding all strings and numbers variables in a dataframe.
 ##' @param df A dataframe to recode
@@ -383,17 +382,14 @@ colwise2 <- function(.fun,.cols=true,...)
 {
     namesfn <- colwise(names,.cols)
     applyfn <- colwise(.fun,.cols,...)
-    function(df,...)
-        {
+    function(df,...) {
             colnames <- names(namesfn(df))
             x <- applyfn(df,...)
-            if(dim(x)[1]==dim(df)[1])
-                {
+            if(dim(x)[1]==dim(df)[1]) {
                     df[,colnames] <- x
                     return(df)
                 }
-            else
-                {
+            else {
                     print("New columns incompatible with old ones")
                     return(x)
                 }
@@ -705,4 +701,63 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
     return(ok)
 }
 
+##' Given a dataframe df and a grouping variable idcol, this function finds which rows are the same across
+##' different groups, i.e. a row will be chosen if it is identical to another row on all variables apart from
+##' the idcol variable which should be different.
+##' 
+##' This function was pinched from here: http://www.cookbook-r.com/Manipulating_data/Comparing_data_frames/
+##' @title Find rows of dataframe that are duplicated between groups (indicated by a grouping variable).
+##' @param df A dataframe
+##' @param idcol The name/index of the grouping variable
+##' @return A logical vector indicating which rows of df are duplicated between groups
+##' @author Winston Chang?
+##' @export 
+dupsBetweenGroups <- function (df, idcol) {
+    ## Make sure idcol is the name of the grouping variable 
+    if(is.numeric(idcol)) idcol <- names(df)[idcol]
+    ## Get the data columns to use for finding matches
+    datacols <- setdiff(names(df), idcol)
+    ## Sort the rows so that duplicates follow each other.
+    ## The original ordering can be recreated using sortorder.
+    sortorder <- do.call(order,df)
+    df <- df[sortorder,]
+    ## Find duplicates within each id group (idcol must match in this case).
+    ## First copy is not marked.
+    dupWithin <- duplicated(df)
+    ## Vector for indicating which elements are duplicated between groups:
+    dupBetween = rep(NA, nrow(df))
+    ## Filter out within group duplicates, and find between groups duplicates (first one isn't marked). 
+    dupBetween[!dupWithin] <- duplicated(df[!dupWithin,datacols])
+    ## Again from the other end to ensure all duplicates are marked.
+    dupBetween[!dupWithin] <- duplicated(df[!dupWithin,datacols], fromLast=TRUE) | dupBetween[!dupWithin]
+    ## ============= Replace NA's with previous non-NA value ==============
+    ## A consecutive sequence of within group duplicates will count as between groups duplicates if and only if
+    ## they come directly after a between groups duplicate (i.e. they are a duplicate of a between groups duplicate)
+    ## So we need to replace the NA's in dupBetween (i.e. the within group duplicates) with the previous non-NA value
+    ## (TRUE if it is a between groups duplicate and FALSE if it isn't).
+    ## This is why we sorted earlier - so that the within group duplicates of the same item would be sequential.
 
+    ## Get indexes of non-NA's, i.e. rows that are not within group duplicates
+    goodIdx <- !dupWithin
+    ## Prepend a leading NA to the non-NA entries of dupBetween so that the initial index is > 0
+    goodVals <- c(NA, dupBetween[goodIdx])
+    ## Fill the indices of the output vector with the indices pulled from these offsets of goodVals.
+    ## Add 1 to avoid indexing to zero (this works since we have prepended an extra NA at the start).
+    fillIdx <- cumsum(goodIdx)+1
+    ## The original vector, now with gaps filled
+    dupBetween <- goodVals[fillIdx]
+
+    ## The following example might make the algorithm clearer:
+    ## goodIdx                   :    T  F  T  T  T  F  T  T  T  T
+    ## cumsum(goodIdx)           :    1  1  2  3  4  4  5  6  7  8
+    ## fillIdx=cumsum(goodIdx)+1 :    2  2  3  4  5  5  6  7  8  9  
+    ## dupsBetween               :    T  NA T  F  F  NA T  T  F  F
+    ## goodVals                  : NA T     T  F  F     T  T  F  F
+    ##                                |\    |  |  |\    |  |  |  |
+    ## goodVals[fillIdx]         :    T  T  T  F  F  F  T  T  F  F
+
+    ## Undo the original sort
+    dupBetween[sortorder] <- dupBetween
+    ## Return the vector indicating between group duplicates
+    return(dupBetween)
+}
