@@ -852,7 +852,7 @@ dupsBetweenDFs <- function(dfs,by=NULL,matchall=FALSE) {
     }
     ## Check that we have the same number of columns for each dataframe
     ncols <- ncol(dfs2[[1]])
-    if(!all(lapply(dfs2,function(df){ncol(df)==ncols})))
+    if(!all(unlist(lapply(dfs2,function(df){ncol(df)==ncols}))))
         stop("differing number of columns in elements of dfs")
     ## label the dataframes
     for(i in 1:length(dfs2)) {
