@@ -35,24 +35,30 @@ complete.cases2 <- function(...,df)
 ## TODO - check it works, I think it still needs work
 ##' @title Merge multiple dataframe by common columns.
 ##' @details Given a list of dataframes, and a list of vectors each of which contains the same number column names/numbers,
-##' merge the dataframes by matching on the corresponding columns. The 'by' argument specifies, for each dataframe, which
-##' columns to use for matching - it should be a list of numeric or character vectors.
-##' The optional 'all' argument can be used to specify for each dataframe whether to keep all rows, or just those matching
-##' some of the other dataframes - it should be a list of NULLs (meaning keep all rows) and/or vectors (indicating which
-##' dataframes to match).
-##' If either of the lists supplied to the 'by' or 'all' arguments are shorter than the list of dataframes then the final
-##' element will be reused to cover missing specifications.
+##' merge the dataframes by matching on the corresponding columns.
+##' The 'by' argument specifies, for each dataframe, which columns to use for matching - it should be a list of numeric or
+##' character vectors. If there are not enough vectors in 'by' to cover all the dataframes in 'data' then the final vector
+##' of 'by' will be recycled to cover missing specifications.
+##'
+##' The optional 'all' argument is a list which can be used to specify for each dataframe which rows to keep.
+##' If the i'th element of 'all' is NULL (default) then all rows of the i'th dataframe will be included in the results.
+##' Otherwise the i'th element of 'all' can be a vector of integers. In this case a row of the i'th dataframe will only
+##' be included if it is duplicated in all of the dataframes corresponding to positive integers, or at least one of the
+##' dataframes corresponding to negative integers in the vector. 
+##' For example if all[[3]]==c(1,2,-4,-5) then a row of the 3rd dataframe will only be included in the results if it is
+##' duplicated in both the 1st & 2nd dataframes or in the 4th or 5th dataframes.
+##'
 ##' To avoid column name clashes, the corresponding dataframe indices will be appended to the names of any columns in the
 ##' results that would otherwise clash. Alternatively suffixes can be specified in the 'suffixes' argument, which should
 ##' be a list of strings.
-##' @param data A list of dataframes to merge.
-##' @param by A list of vectors each of which contains column names/numbers to be used for matching rows of the corresponding
-##' dataframe in 'data'. Each of these vectors should be the same length.
-##' @param all A list of vectors/NULL values, each indicating which rows of the corresponding dataframe in 'data' to keep.
-##' A NULL entry (default) indicates that all rows will be kept. A vector entry should contain indices of dataframes in 'data'.
-##' Then the only rows that will be kept are those that match all the dataframes with those indices.
-##' @param suffixes A list of suffixes (one for each dataframe) to be appended to clashing column names in order to indicate
-##' the original dataframe.
+##' @param data a list of dataframes to merge.
+##' @param by a list of vectors each of which contains column names/numbers to be used for matching rows of the corresponding
+##' dataframe in 'data'. Each of these vectors should be the same length. Final vector will be recycled to fill in missing
+##' vectors.
+##' @param all (optional) list of vectors/NULL values, each indicating which rows of the corresponding dataframe in 'data'
+##' to keep. See details below.
+##' @param suffixes (optional) list or vector of suffixes (one for each dataframe) to be appended to clashing column names
+##' in order to indicate the original dataframe. 
 ##' @return A single dataframe containing the merged data.
 ##' @author Ben Veal
 ##' @export
@@ -68,39 +74,38 @@ multimerge <- function(data,by,all=NULL,suffixes=NULL) {
         else if(is.numeric(by[[i]]))
                  by[[i]] <- names(data[[i]])[by[[i]]]
     }
-    ## append suffixes to conflicting column names
-    cols <- mapply(function(a,b){setdiff(names(a),b)},data,by,SIMPLIFY=FALSE)
-    for(i in 1:len) {
-        dups <- intersect(cols[[i]],unlist(cols[-i]))
-        indices <- cols[[i]] %in% dups
-        if(length(suffixes) >= i && !is.na(suffixes[[i]]))
-            cols[[i]][indices] <- paste(cols[[i]][indices],suffixes[[i]],sep=".")
-        else cols[[i]][indices] <- paste(cols[[i]][indices],as.character(i),sep=".")
-    }
     ## subset dataframes to appropriate rows according to values in "all" argument
     data2 <- list()
     for(i in 1:len) {
-            if(length(all) < i || is.null(all[[i]]) || all[[i]] == c(i))
-                keep <- 1:nrow(data[[i]])
-            else {
-                ## first need to find which rows to keep
-                keep <- rep(TRUE,nrow(data[[i]]))
-                for(j in all[[i]]) {
-                    for(k in 1:nrow(data[[i]])) {
-                        r1 <- data[[i]][k,by[[i]]]
-                        r2 <- data[[j]][k,by[[j]]]
-                    }
-                    ## loop over 'by' columns, filtering out non-matching rows each time
-                    for(k in 1:length(by[[i]]))
-                        keep <- keep & (data[[i]][,by[[i]]] %in% data[[j]][,by[[j]]])
-                    data2[[i]] <- data[[i]][keep,]
-                }
-            }
-            data2[[i]] <- data[[i]][keep,]
+        if(length(all) < i || is.null(all[[i]]) || all[[i]] == c(i))
+            keep <- rep(TRUE,nrow(data[[i]]))
+        else {
+            keep <- rep(FALSE,nrow(data[[i]]))
+            posids <- all[[i]][which(all[[i]] > 0)]
+            negids <- -(all[[i]][which(all[[i]] < 0)])
+            if(length(negids)>0)
+                keep <- keep | dupsBetweenDFs(data[c(i,negids)],by=by[c(i,negids)],matchall=FALSE)[[1]]
+            if(length(posids)>0)
+                keep <- keep | dupsBetweenDFs(data[c(i,posids)],by=by[c(i,posids)],matchall=TRUE)[[1]]
+        }
+        data2[[i]] <- data[[i]][keep,]
+    }
+    ## append suffixes to conflicting column names (can't rely on 'merge' function to do this properly)
+    cols <- mapply(function(a,b){setdiff(names(a),b)},data,by,SIMPLIFY=FALSE)
+    for(i in 1:len) {
+        dups <- intersect(cols[[i]],unlist(cols[-i]))
+        indices <- names(data2[[i]]) %in% dups
+        if(length(suffixes) >= i && !is.na(suffixes[[i]]))
+            names(data2[[i]])[indices] <- paste0(names(data2[[i]])[indices],suffixes[[i]])
+        else names(data2[[i]])[indices] <- paste0(names(data2[[i]])[indices],".",as.character(i))
     }
     ## finally, merge the data
     accum <- data2[[1]]
-    for(i in 2:len) accum <- merge(accum,data2[[i]],by.x=by[[i-1]],by.y=by[[i]],suffixes=c())
+    for(i in 2:len) {
+        sufx <- ifelse(is.null(suffixes[[i-1]]),paste0(".",i-1),suffixes[[i-1]])
+        sufy <- ifelse(is.null(suffixes[[i]]),paste0(".",i),suffixes[[i]])
+        accum <- merge(accum,data2[[i]],by.x=by[[i-1]],by.y=by[[i]],all=TRUE)
+    }
     return(accum)
 }
 
@@ -703,18 +708,64 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
 
 ##' Given a dataframe df and a grouping variable idcol, this function finds which rows are the same across
 ##' different groups, i.e. a row will be chosen if it is identical to another row on all variables apart from
-##' the idcol variable which should be different.
+##' the idcol variable which should be different. If `matchall' is TRUE then only rows which are the same
+##' across all groups will be chosen, otherwise rows which are the same across at least 2 groups are reported.
 ##' 
-##' This function was pinched from here: http://www.cookbook-r.com/Manipulating_data/Comparing_data_frames/
+##' This function uses code by Winston Chang pinched from here:
+##'       http://www.cookbook-r.com/Manipulating_data/Comparing_data_frames/
 ##' @title Find rows of dataframe that are duplicated between groups (indicated by a grouping variable).
 ##' @param df A dataframe
 ##' @param idcol The name/index of the grouping variable
+##' @param matchall If TRUE then find rows that are duplicated across ALL groups, otherwise a row only need
+##' be duplicated across 2 groups
+##' @return A logical vector indicating which rows of df are duplicated between groups
+##' @author Ben Veal
+##' @export
+dupsBetweenGroups <- function(df,idcol,matchall=FALSE) {
+    ## If there is only 1 group then we can return now
+    if(length(unique(df[,idcol]))==1) return(rep(FALSE,nrow(df)))
+    ## Make sure idcol is the name of the grouping variable 
+    if(is.numeric(idcol)) idcol <- names(df)[idcol]
+    if(matchall) {
+        idvals <- unique(df$idcol) 
+        ## First find rows of first group which are duplicated across all groups
+        ## these will be stored in group1dups at the end.
+        grp1 <- idvals[1]
+        ids <- df$idcol
+        ## initialize group1dups to include all rows in group 1
+        group1dups <- (ids==grp1)
+        ## loop over i: compare group1dups with group i rows, and update group1dups
+        for(i in 2:length(idvals)) {
+            ## find duplicates between i'th group rows and group1dups rows
+            rows <- (ids==idvals[i]) | group1dups
+            dups <- .dupsBetweenSomeGroups(df[rows,],idcol)
+            ## update group1dups to only include rows also duplicated in group i 
+            group1dups[group1dups] <- dups[ids[rows]==grp1]
+        }
+        ## group1dups now shows group 1 rows that are duplicated across all groups.
+        ## To find corresponding rows in other groups, we need to iterate over all groups again.
+        alldups <- group1dups
+        for(i in 2:length(idvals)) {
+            ## find duplicates between i'th group rows and group1dups rows
+            rows <- (ids==idvals[i]) | group1dups
+            dups <- .dupsBetweenSomeGroups(df[rows,],idcol)
+            ## update alldups to include rows common to group i and group1dups
+            alldups[ids==idvals[i]] <- dups[ids[rows]==idvals[i]]
+        }
+        return(alldups)
+    } else return(.dupsBetweenSomeGroups(df,idcol))
+}
+
+##' Function called by \code{\link{dupsBetweenGroups}} when the 'matchall' argument is FALSE
+##'
+##' This function was pinched from here: http://www.cookbook-r.com/Manipulating_data/Comparing_data_frames/
+##' @title Internal function used by \code{\link{dupsBetweenGroups}} (which see)
+##' @param df A dataframe
+##' @param idcol The name of the grouping variable
 ##' @return A logical vector indicating which rows of df are duplicated between groups
 ##' @author Winston Chang?
 ##' @export 
-dupsBetweenGroups <- function (df, idcol) {
-    ## Make sure idcol is the name of the grouping variable 
-    if(is.numeric(idcol)) idcol <- names(df)[idcol]
+.dupsBetweenSomeGroups <- function (df, idcol) {
     ## Get the data columns to use for finding matches
     datacols <- setdiff(names(df), idcol)
     ## Sort the rows so that duplicates follow each other.
@@ -748,6 +799,8 @@ dupsBetweenGroups <- function (df, idcol) {
     dupBetween <- goodVals[fillIdx]
 
     ## The following example might make the algorithm clearer:
+    ## df (letters 4 unique rows):    A  A  B  C  D  D  A  B  E  F
+    ## idcol                     :   g1 g1 g2 g2 g2 g2 g3 g3 g3 g3
     ## goodIdx                   :    T  F  T  T  T  F  T  T  T  T
     ## cumsum(goodIdx)           :    1  1  2  3  4  4  5  6  7  8
     ## fillIdx=cumsum(goodIdx)+1 :    2  2  3  4  5  5  6  7  8  9  
@@ -761,3 +814,57 @@ dupsBetweenGroups <- function (df, idcol) {
     ## Return the vector indicating between group duplicates
     return(dupBetween)
 }
+
+##' Find rows that are duplicated across dataframes
+##'
+##' This is just a wrapper around \code{\link{dupsBetweenGroups}} (which see),
+##' but for separate dataframes instead of groups within a single dataframe.
+##'
+##' The 'by' argument can be used for specifying which columns to restrict each
+##' dataframe in 'dfs' to. Each element of 'by' can be either NULL (default) or
+##' a character/numeric vector. A NULL value means use all columns and a character
+##' or numeric vector means use the columns indicated by that vector.
+##'
+##' @title Find rows that are duplicated across dataframes
+##' @param dfs a list of dataframes to compare
+##' @param by a list of vectors each of which indicates which columns to use for
+##' the corresponding dataframe in 'dfs'. A NULL value means use all columns.
+##' @param matchall If TRUE then find rows that are duplicated across ALL groups, 
+##' otherwise a row only need be duplicated across 2 groups
+##' @return a list of vectors indicating duplicated rows of dataframes
+##' @author Ben Veal
+##' @export 
+dupsBetweenDFs <- function(dfs,by=NULL,matchall=FALSE) {
+    dfs2 <- list()
+    ## First restrict to the columns specified in 'by'
+    for(i in 1:length(dfs)) {
+        if(is.null(by[[i]]))
+            dfs2 <- c(dfs2,list(dfs[[i]]))
+        else {
+            if(length(by[[i]])>1) 
+                dfs2 <- c(dfs2,list(dfs[[i]][,by[[i]]]))
+            else {
+                x <- as.data.frame(dfs[[i]][,by[[i]]])
+                names(x) <- by[[i]]
+                dfs2 <- c(dfs2,list(x))
+            }
+        }
+    }
+    ## Check that we have the same number of columns for each dataframe
+    ncols <- ncol(dfs2[[1]])
+    if(!all(lapply(dfs2,function(df){ncol(df)==ncols})))
+        stop("differing number of columns in elements of dfs")
+    ## label the dataframes
+    for(i in 1:length(dfs2)) {
+        ## hopefully there are no existing columns named idcolzyx
+        dfs2[[i]]$idcolzyx <- i 
+    }
+    ## join the dataframes together
+    alldata <- do.call(rbind,dfs2)
+    ## find the duplicate rows
+    dupsL <- dupsBetweenGroups(alldata,"idcolzyx",matchall=matchall)
+    ## separate the indicator vectors in dupsL
+    return(split(dupsL,alldata$idcolzyx))
+}
+
+
