@@ -29,7 +29,7 @@ complete.cases2 <- function(...,df)
       else stop("Function args should be strings or formulas and a data.frame for the df arg.")
     }
   vars <- substring(vars,2,nchar(vars))
-  evalstr("evalq(complete.cases(",vars,"),envir=as.data.frame(df))")
+  eval(parse(text=paste0("evalq(complete.cases(",vars,"),envir=as.data.frame(df))")))
 }
 
 ## TODO - check it works, I think it still needs work
@@ -101,11 +101,8 @@ multimerge <- function(data,by,all=NULL,suffixes=NULL) {
     }
     ## finally, merge the data
     accum <- data2[[1]]
-    for(i in 2:len) {
-        sufx <- ifelse(is.null(suffixes[[i-1]]),paste0(".",i-1),suffixes[[i-1]])
-        sufy <- ifelse(is.null(suffixes[[i]]),paste0(".",i),suffixes[[i]])
-        accum <- merge(accum,data2[[i]],by.x=by[[i-1]],by.y=by[[i]],all=TRUE)
-    }
+    for(i in 2:len)
+        accum <- merge(accum,data2[[i]],by.x=by[[1]],by.y=by[[i]],all=TRUE)
     return(accum)
 }
 
@@ -298,7 +295,7 @@ recodeMatches <- function(x,patterns,targets,default=NULL,keep.na=TRUE,ignore.ca
                 }
         }
     if(length(src)>0)
-        recodeVar(x,src,tgt,default=default,keep.na=keep.na)
+        doBy::recodeVar(x,src,tgt,default=default,keep.na=keep.na)
     else
         x
 }
@@ -341,7 +338,7 @@ recodeAs <- function(A,B)
 recodeDF <- function(df,sPatterns,sTargets=NA,nRecodes)
 {
     fn1 <- colwise2(recodeMatches,is.character.contents,patterns=sPatterns,targets=sTargets)
-    fn2 <- colwise2(recode,is.numeric.contents,recodes=nRecodes)
+    fn2 <- colwise2(car::recode,is.numeric.contents,recodes=nRecodes)
     fn2(fn1(df))
 }
 
@@ -385,8 +382,8 @@ recodeDFas <- function(df1,df2,cols1,cols2=cols1)
 ##' @export
 colwise2 <- function(.fun,.cols=true,...)
 {
-    namesfn <- colwise(names,.cols)
-    applyfn <- colwise(.fun,.cols,...)
+    namesfn <- plyr::colwise(names,.cols)
+    applyfn <- plyr::colwise(.fun,.cols,...)
     function(df,...) {
             colnames <- names(namesfn(df))
             x <- applyfn(df,...)
@@ -417,7 +414,7 @@ colwise2 <- function(.fun,.cols=true,...)
 ##' @export
 matchStrings <- function(A,B,onto=TRUE)
 {
-    distMat <- stringdistmatrix(A,B,method="jw")
+    distMat <- stringdist::stringdistmatrix(A,B,method="jw")
     matchByDistance(distMat)
 }
 
@@ -509,7 +506,7 @@ matchByDistance <- function(distMat,onto=TRUE)
 ##' @return TRUE if all checks passed, FALSE otherwise.
 ##' @seealso \code{\link{checkDF}}, \code{\link{CurryL}}, \code{\link{apply}}
 ##' @examples # create a function for checking variables in "ChickWeight" dataframe
-##' checkalldata <- CurryL(checkVar,data=ChickWeight)
+##' checkalldata <- functional::CurryL(checkVar,data=ChickWeight)
 ##' checkalldata(weight,vartype="numeric")
 ##' # check each and every variable of dataframe
 ##' apply(ChickWeight,2,function(x){checkVar(x,vartype="numeric")})
@@ -529,12 +526,12 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
     len <- length(var)
     ok <- TRUE
     # useful macros to save some typing
-    report <- defmacro(str,expr={msg <- paste(str,"for",varname);
+    report <- gtools::defmacro(str,expr={msg <- paste(str,"for",varname);
                                  if(stoponfail) stop(msg);
                                  if(!silent) print(msg);
                                  ok <- FALSE})
-    mintest <- defmacro(val,tot,min,str,expr={if(val < min | (min <= 1 & val/tot < min)) report(str)})
-    maxtest <- defmacro(val,tot,max,str,expr={if(val/tot > max | (max >= 1 & val > max)) report(str)})
+    mintest <- gtools::defmacro(val,tot,min,str,expr={if(val < min | (min <= 1 & val/tot < min)) report(str)})
+    maxtest <- gtools::defmacro(val,tot,max,str,expr={if(val/tot > max | (max >= 1 & val > max)) report(str)})
     # perform the checks
     if(!missing(vartype))
         if(!(vartype==typeof(var)))
@@ -650,12 +647,12 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
     ncols2 <- dim(data)[2]
     ok <- TRUE
     # useful macros to save some typing
-    report <- defmacro(str,expr={msg <- paste(str,"for",framename,"dataframe");
+    report <- gtools::defmacro(str,expr={msg <- paste(str,"for",framename,"dataframe");
                                  if(stoponfail) stop(msg);
                                  if(!silent) print(msg);
                                  ok <- FALSE})
-    mintest <- defmacro(val,tot,min,str,expr={if(val < min | (min <= 1 & val/tot < min)) report(paste("Not enough",str))})
-    maxtest <- defmacro(val,tot,max,str,expr={if(val/tot > max | (max >= 1 & val > max)) report(paste("Too many",str))})
+    mintest <- gtools::defmacro(val,tot,min,str,expr={if(val < min | (min <= 1 & val/tot < min)) report(paste("Not enough",str))})
+    maxtest <- gtools::defmacro(val,tot,max,str,expr={if(val/tot > max | (max >= 1 & val > max)) report(paste("Too many",str))})
     # do dataframe wide checks
     if(!missing(min_rows))
         mintest(nrows2,nrows1,min_rows,subsetmsg)
@@ -764,7 +761,6 @@ dupsBetweenGroups <- function(df,idcol,matchall=FALSE) {
 ##' @param idcol The name of the grouping variable
 ##' @return A logical vector indicating which rows of df are duplicated between groups
 ##' @author Winston Chang?
-##' @export 
 .dupsBetweenSomeGroups <- function (df, idcol) {
     ## Get the data columns to use for finding matches
     datacols <- setdiff(names(df), idcol)
