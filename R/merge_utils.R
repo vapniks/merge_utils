@@ -43,10 +43,10 @@ complete.cases2 <- function(...,df)
 ##' The optional 'all' argument is a list which can be used to specify for each dataframe which rows to keep.
 ##' If the i'th element of 'all' is NULL (default) then all rows of the i'th dataframe will be included in the results.
 ##' Otherwise the i'th element of 'all' can be a vector of integers. In this case a row of the i'th dataframe will only
-##' be included if it is duplicated in all of the dataframes corresponding to positive integers, or at least one of the
+##' be included if it is matched in all of the dataframes corresponding to positive integers, or at least one of the
 ##' dataframes corresponding to negative integers in the vector. 
 ##' For example if all[[3]]==c(1,2,-4,-5) then a row of the 3rd dataframe will only be included in the results if it is
-##' duplicated in both the 1st & 2nd dataframes or in the 4th or 5th dataframes.
+##' matched in both the 1st & 2nd dataframes or in the 4th or 5th dataframes.
 ##'
 ##' To avoid column name clashes, the corresponding dataframe indices will be appended to the names of any columns in the
 ##' results that would otherwise clash. Alternatively suffixes can be specified in the 'suffixes' argument, which should
