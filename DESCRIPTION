@@ -14,4 +14,5 @@ Depends:
     car,
     doBy,
     stringdist,
-    gtools
+    gtools,
+    functional
