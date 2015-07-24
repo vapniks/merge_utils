@@ -54,7 +54,7 @@ complete.cases2 <- function(...,df)
 ##' @param data a list of dataframes to merge.
 ##' @param by a list of vectors each of which contains column names/numbers to be used for matching rows of the corresponding
 ##' dataframe in 'data'. Each of these vectors should be the same length. Final vector will be recycled to fill in missing
-##' vectors.
+##' vectors. If this argument is left as NULL then all common column names will be used for matching.
 ##' @param all (optional) list of vectors/NULL values, each indicating which rows of the corresponding dataframe in 'data'
 ##' to keep. See details below.
 ##' @param suffixes (optional) list or vector of suffixes (one for each dataframe) to be appended to clashing column names
@@ -62,17 +62,15 @@ complete.cases2 <- function(...,df)
 ##' @return A single dataframe containing the merged data.
 ##' @author Ben Veal
 ##' @export
-multimerge <- function(data,by,all=NULL,suffixes=NULL) {
+multimerge <- function(data,by=NULL,all=NULL,suffixes=NULL) {
     len <- length(data)
-    ## If "by" is not supplied check dataframes for common variables,
-    ## and throw an error if there are none.
-    if(is.null(by)) by <- Reduce(intersect,Map(names,data))
-    if(length(by)==0) stop("No common variables!")
-    ## make sure there are names for all dataframes, and convert numeric variable indices to variable names
-    for(i in 1:len) {
-        if(i > length(by)) by[[i]] <- by[[i-1]]
-        else if(is.numeric(by[[i]]))
-                 by[[i]] <- names(data[[i]])[by[[i]]]
+    ## make sure there are names for all elements of by dataframes, and convert numeric variable indices to variable names
+    if(!is.null(by)) {
+        for(i in 1:len) {
+            if(i > length(by)) by[[i]] <- by[[i-1]]
+            else if(is.numeric(by[[i]]))
+                by[[i]] <- names(data[[i]])[by[[i]]]
+        }
     }
     ## subset dataframes to appropriate rows according to values in "all" argument
     data2 <- list()
@@ -91,18 +89,24 @@ multimerge <- function(data,by,all=NULL,suffixes=NULL) {
         data2[[i]] <- data[[i]][keep,]
     }
     ## append suffixes to conflicting column names (can't rely on 'merge' function to do this properly)
-    cols <- mapply(function(a,b){setdiff(names(a),b)},data,by,SIMPLIFY=FALSE)
-    for(i in 1:len) {
-        dups <- intersect(cols[[i]],unlist(cols[-i]))
-        indices <- names(data2[[i]]) %in% dups
-        if(length(suffixes) >= i && !is.na(suffixes[[i]]))
-            names(data2[[i]])[indices] <- paste0(names(data2[[i]])[indices],suffixes[[i]])
-        else names(data2[[i]])[indices] <- paste0(names(data2[[i]])[indices],".",as.character(i))
+    if(!is.null(by)) {
+        cols <- mapply(function(a,b){setdiff(names(a),b)},data,by,SIMPLIFY=FALSE)
+        for(i in 1:len) {
+            dups <- intersect(cols[[i]],unlist(cols[-i]))
+            indices <- names(data2[[i]]) %in% dups
+            if(length(suffixes) >= i && !is.na(suffixes[[i]]))
+                names(data2[[i]])[indices] <- paste0(names(data2[[i]])[indices],suffixes[[i]])
+            else names(data2[[i]])[indices] <- paste0(names(data2[[i]])[indices],".",as.character(i))
+        }
     }
     ## finally, merge the data
     accum <- data2[[1]]
-    for(i in 2:len)
-        accum <- merge(accum,data2[[i]],by.x=by[[1]],by.y=by[[i]],all=TRUE)
+    for(i in 2:len) {
+        if(is.null(by[[1]]))
+            accum <- merge(accum,data2[[i]],all=TRUE)
+        else
+            accum <- merge(accum,data2[[i]],by.x=by[[1]],by.y=by[[i]],all=TRUE)
+    }
     return(accum)
 }
 
