@@ -2,7 +2,7 @@
 % Please edit documentation in R/merge_utils.R
 \name{recodeDF}
 \alias{recodeDF}
-\title{Recode collection of variables so that they all the same unique values.}
+\title{Recode collection of variables so that they all have the same unique values.}
 \usage{
 recodeDF(df, sPatterns, sTargets = NA, nRecodes)
 }
@@ -19,7 +19,7 @@ recodeDF(df, sPatterns, sTargets = NA, nRecodes)
 a dataframe (recoded)
 }
 \description{
-Recode collection of variables so that they all the same unique values.
+Recode collection of variables so that they all have the same unique values.
 }
 \details{
 This is a wrapper around \code{\link{recodeMatches}} & \code{\link{recode}} (in library(car))

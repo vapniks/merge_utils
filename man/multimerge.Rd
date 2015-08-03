@@ -4,20 +4,20 @@
 \alias{multimerge}
 \title{Merge multiple dataframe by common columns.}
 \usage{
-multimerge(data, by, all = NULL, suffixes = NULL)
+multimerge(data, by = NULL, all = NULL, suffixes = NULL)
 }
 \arguments{
-\item{data}{A list of dataframes to merge.}
+\item{data}{a list of dataframes to merge.}
 
-\item{by}{A list of vectors each of which contains column names/numbers to be used for matching rows of the corresponding
-dataframe in 'data'. Each of these vectors should be the same length.}
+\item{by}{a list of vectors each of which contains column names/numbers to be used for matching rows of the corresponding
+dataframe in 'data'. Each of these vectors should be the same length. Final vector will be recycled to fill in missing
+vectors. If this argument is left as NULL then all common column names will be used for matching.}
 
-\item{all}{A list of vectors/NULL values, each indicating which rows of the corresponding dataframe in 'data' to keep.
-A NULL entry (default) indicates that all rows will be kept. A vector entry should contain indices of dataframes in 'data'.
-Then the only rows that will be kept are those that match all the dataframes with those indices.}
+\item{all}{(optional) list of vectors/NULL values, each indicating which rows of the corresponding dataframe in 'data'
+to keep. See details below.}
 
-\item{suffixes}{A list of suffixes (one for each dataframe) to be appended to clashing column names in order to indicate
-the original dataframe.}
+\item{suffixes}{(optional) list or vector of suffixes (one for each dataframe) to be appended to clashing column names
+in order to indicate the original dataframe.}
 }
 \value{
 A single dataframe containing the merged data.
@@ -27,13 +27,19 @@ Merge multiple dataframe by common columns.
 }
 \details{
 Given a list of dataframes, and a list of vectors each of which contains the same number column names/numbers,
-merge the dataframes by matching on the corresponding columns. The 'by' argument specifies, for each dataframe, which
-columns to use for matching - it should be a list of numeric or character vectors.
-The optional 'all' argument can be used to specify for each dataframe whether to keep all rows, or just those matching
-some of the other dataframes - it should be a list of NULLs (meaning keep all rows) and/or vectors (indicating which
-dataframes to match).
-If either of the lists supplied to the 'by' or 'all' arguments are shorter than the list of dataframes then the final
-element will be reused to cover missing specifications.
+merge the dataframes by matching on the corresponding columns.
+The 'by' argument specifies, for each dataframe, which columns to use for matching - it should be a list of numeric or
+character vectors. If there are not enough vectors in 'by' to cover all the dataframes in 'data' then the final vector
+of 'by' will be recycled to cover missing specifications.
+
+The optional 'all' argument is a list which can be used to specify for each dataframe which rows to keep.
+If the i'th element of 'all' is NULL (default) then all rows of the i'th dataframe will be included in the results.
+Otherwise the i'th element of 'all' can be a vector of integers. In this case a row of the i'th dataframe will only
+be included if it is matched in all of the dataframes corresponding to positive integers, or at least one of the
+dataframes corresponding to negative integers in the vector.
+For example if all[[3]]==c(1,2,-4,-5) then a row of the 3rd dataframe will only be included in the results if it is
+matched in both the 1st & 2nd dataframes or in the 4th or 5th dataframes.
+
 To avoid column name clashes, the corresponding dataframe indices will be appended to the names of any columns in the
 results that would otherwise clash. Alternatively suffixes can be specified in the 'suffixes' argument, which should
 be a list of strings.

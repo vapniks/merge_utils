@@ -2,41 +2,38 @@
 \alias{merge_utils-package}
 \alias{merge_utils}
 \docType{package}
-\title{
-What the package does (short line)
-~~ package title ~~
-}
-\description{
-More about what it does (maybe more than one line)
-~~ A concise (1-5 lines) description of the package ~~
-}
+\title{Functions to aid merging disparate datasets}
+\description{This package contains various functions for checking data,
+recoding variables, and merging dataframes.}
 \details{
-\tabular{ll}{
-Package: \tab merge_utils\cr
+\tabular{ll}{Package: \tab mergeutils\cr
 Type: \tab Package\cr
 Version: \tab 1.0\cr
 Date: \tab 2014-07-17\cr
-License: \tab What license is it under?\cr
-}
-~~ An overview of how to use the package, including the most important ~~
-~~ functions ~~
-}
-\author{
-Who wrote it
+License: \tab GNU GPLv3\cr}
+This package is useful when you have to merge together several different
+data sources. You can make sure the variables are coded consistently
+across dataframes using the various recode functions: recodeMatches,
+recodeAs, recodeDF, and recodeDFas. Then you can merge them together
+using multimerge which allows some flexibility in which rows are
+included for each dataframe. Then you can check your results using the
+checkVar and checkDF functions. You can also check for duplicate rows
+across dataframes using the dupsBetweenDFs function.
+There are also some utility functions such as colwise2 (a variation of
+the plyr function colwise), unfactor (turn a factor into a
+numeric/character vector), matchStrings (find nearest matches from one
+set of strings to another).}
+\author{Joe Bloggs
 
-Maintainer: Who to complain to <yourfault@somewhere.net>
-~~ The author and/or maintainer of the package ~~
-}
+Maintainer: Who to complain to <vapniks@yahoo.com>}
 \references{
-~~ Literature or other references for background information ~~
+http://www.cookbook-r.com/Manipulating_data/Comparing_data_frames/
 }
-~~ Optionally other standard keywords, one per line, from file KEYWORDS in ~~
-~~ the R documentation directory ~~
-\keyword{ package }
+\keyword{package
+  manip
+  utilities}
 \seealso{
-~~ Optional links to other man pages, e.g. ~~
-~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
+  \code{\link[car:car-package]{recode}}
+  \code{\link{merge}}
 }
-\examples{
-~~ simple examples of the most important functions ~~
-}
+\examples{}

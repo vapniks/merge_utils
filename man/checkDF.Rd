@@ -76,7 +76,7 @@ If the 'stoponfail' argument is set to TRUE then an error will be thrown on the 
 otherwise the return value of the function indicates whether all checks passed (TRUE) or not (FALSE).
 }
 \examples{
-checkDF(ChickWeight,weight>time)
+checkDF(ChickWeight,weight>Time)
 checkDF(ChickWeight,min_uniq=10)
 }
 \author{

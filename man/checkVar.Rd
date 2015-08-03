@@ -66,7 +66,7 @@ the CurryL function in the functional library, e.g: checkalldata <- CurryL(check
 }
 \examples{
 # create a function for checking variables in "ChickWeight" dataframe
-checkalldata <- CurryL(checkVar,data=ChickWeight)
+checkalldata <- functional::CurryL(checkVar,data=ChickWeight)
 checkalldata(weight,vartype="numeric")
 # check each and every variable of dataframe
 apply(ChickWeight,2,function(x){checkVar(x,vartype="numeric")})
