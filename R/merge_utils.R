@@ -162,7 +162,7 @@ contents <- function(x)
         "unknown"
 }
 
-##' @title Test if contents of vector are character/string values.
+##' @title Test if contents of vector or factor are character/string values.
 ##' @details Unlike \code{\link{is.character}} this works with factors.
 ##' @param x 
 ##' @return TRUE or FALSE
@@ -174,7 +174,7 @@ is.character.contents <- function(x)
     contents(x)=="character"
 }
 
-##' @title Test if contents of vector are numeric values.
+##' @title Test if contents of vector or factor are numeric values.
 ##' @details Unlike \code{\link{is.character}} this works with factors, and will also return TRUE if the
 ##' contents are strings containing only numbers.
 ##' @param x 
@@ -187,7 +187,7 @@ is.numeric.contents <- function(x)
     contents(x)=="numeric"
 }
 
-##' @title Test if contents of vector are logical (TRUE/FALSE) values.
+##' @title Test if contents of vector or factor are logical (TRUE/FALSE) values.
 ##' @details Unlike \code{\link{is.character}} this works with factors.
 ##' @param x 
 ##' @return TRUE or FALSE
