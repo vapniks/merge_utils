@@ -2,7 +2,7 @@
 % Please edit documentation in R/merge_utils.R
 \name{is.character.contents}
 \alias{is.character.contents}
-\title{Test if contents of vector are character/string values.}
+\title{Test if contents of vector or factor are character/string values.}
 \usage{
 is.character.contents(x)
 }
@@ -13,7 +13,7 @@ is.character.contents(x)
 TRUE or FALSE
 }
 \description{
-Test if contents of vector are character/string values.
+Test if contents of vector or factor are character/string values.
 }
 \details{
 Unlike \code{\link{is.character}} this works with factors.

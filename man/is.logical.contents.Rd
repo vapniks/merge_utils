@@ -2,7 +2,7 @@
 % Please edit documentation in R/merge_utils.R
 \name{is.logical.contents}
 \alias{is.logical.contents}
-\title{Test if contents of vector are logical (TRUE/FALSE) values.}
+\title{Test if contents of vector or factor are logical (TRUE/FALSE) values.}
 \usage{
 is.logical.contents(x)
 }
@@ -13,7 +13,7 @@ is.logical.contents(x)
 TRUE or FALSE
 }
 \description{
-Test if contents of vector are logical (TRUE/FALSE) values.
+Test if contents of vector or factor are logical (TRUE/FALSE) values.
 }
 \details{
 Unlike \code{\link{is.character}} this works with factors.
