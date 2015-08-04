@@ -868,3 +868,12 @@ dupsBetweenDFs <- function(dfs,by=NULL,matchall=FALSE) {
 }
 
 
+##' @title Return the number of unique elements of x (excluding NA & NaN's)
+##' @param x A vector.
+##' @param warn Whether to issue warnings from 'unique' (default is FALSE).
+##' @return The number of unique values of 'x' excluding NA & NaN values.
+##' @author Ben Veal
+##' @export 
+numUnique <- function(x,warn=FALSE) {
+    length(uniqueNotNA(x,warn))
+}
