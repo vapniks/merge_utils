@@ -20,7 +20,6 @@ Functions to aid merging and recoding multiple sets of data, and checking data i
 | is.numeric.contents   | Test if contents of vector are numeric values.                                                                |
 | matchByDistance       | Match elements of one set with closest elements of another set, according to their mutual distances.          |
 | matchStrings          | Match strings in A with strings in B                                                                          |
-| merge_utils-package   | Functions to aid merging disparate datasets                                                                   |
 | multimerge            | Merge multiple dataframe by common columns.                                                                   |
 | recodeAs              | Recode unique values of one variable to match unique values of another variable.                              |
 | recodeDF              | Recode collection of variables so that they all have the same unique values.                                  |
