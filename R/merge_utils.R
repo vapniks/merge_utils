@@ -500,12 +500,16 @@ matchByDistance <- function(distMat,onto=TRUE)
 ##' @param vals (optional), list of all unique non missing values (compared with uniqueNotNA(var))
 ##' @param valstype (optional) used in conjunction with 'vals'. If "all" (default) then 'vals' should contain all the same
 ##' items as uniqueNotNA(var), if "subset"/"superset" then 'vals' should be a subset/superset of uniqueNotNA(var)
+##' @param charmatch (optional) regexp that should match each value. Use only with character variables.
+##' @param nocharmatch (optional) regexp that should not match any value. Use only with character variables.
 ##' @param min_uniq (optional) minimum number of unique values (compare with length(unique(var)))
 ##' @param max_uniq (optional) maximum number of unique values (compare with length(unique(var)))
 ##' @param max_na (optional) maximum number of missing values (compare with sum(is.na(var)))
 ##' @param pred (optional) A function which takes a variable as input and returns TRUE/FALSE depending on whether the
 ##' variable is valid or not.
 ##' @param silent (optional) if TRUE then don't omit warning messages informing of error type (FALSE by default)
+##' @param showbadvals (optional) if a positive integer N then print the first N non-matching values for each test
+##' on individual values (default: N = 100)
 ##' @param stoponfail (optional) if TRUE then throw an error on the first check that fails (FALSE by default)
 ##' @return TRUE if all checks passed, FALSE otherwise.
 ##' @seealso \code{\link{checkDF}}, \code{\link{CurryL}}, \code{\link{apply}}
@@ -516,8 +520,8 @@ matchByDistance <- function(distMat,onto=TRUE)
 ##' apply(ChickWeight,2,function(x){checkVar(x,vartype="numeric")})
 ##' @author Ben Veal
 ##' @export
-checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,vals,valstype="all",
-                     min_uniq,max_uniq,max_na,pred,silent=FALSE,stoponfail=FALSE)
+checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,vals,valstype="all",charmatch,nocharmatch,
+                     min_uniq,max_uniq,max_na,pred,showbadvals=100,silent=FALSE,stoponfail=FALSE)
 {
     subvar <- substitute(var)
     if(is.symbol(subvar))
@@ -529,14 +533,33 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
     isnumeric <- mode(var) == "numeric"
     len <- length(var)
     ok <- TRUE
-    # useful macros to save some typing
-    report <- gtools::defmacro(str,expr={msg <- paste(str,"for",varname);
-                                 if(stoponfail) stop(msg);
-                                 if(!silent) print(msg);
-                                 ok <- FALSE})
+    ## Useful functions and macros to save some typing
+    is.positiveint <- function(x) (abs(x - round(x)) < .Machine$double.eps^0.5 & x > 0)
+    min2 <- function(x,y) {if (x<y) return(x) else return(y)} ## for some reason "min" doesnt work inside defmacro
+    ## The following macro is used for reporting results of each test.
+    ## str is a message, and idxs is the vector of indices where the test fails
+    report <- gtools::defmacro(str,idxs=NULL,
+                               expr={msg <- paste(str,"for",varname);
+                                   if(!silent) {
+                                       cat(msg)
+                                       if(!missing(showbadvals) & is.positiveint(showbadvals) & !is.null(idxs)) {
+                                           cat(":\n")
+                                           cat(var[idxs[1:min2(showbadvals,length(idxs))]],sep=" ")
+                                           if(showbadvals<length(idxs)) cat(" ... ")
+                                           cat("\n\nAt indices:\n")
+                                           cat(idxs[1:min2(showbadvals,length(idxs))],sep=",")
+                                           if(showbadvals<length(idxs)) cat(" ...")
+                                           cat("\n")
+                                       }
+                                       cat("\n")
+                                   }
+                                   if(stoponfail) {
+                                       stop("stopping")
+                                   }
+                                   ok <- FALSE})
     mintest <- gtools::defmacro(val,tot,min,str,expr={if(val < min | (min <= 1 & val/tot < min)) report(str)})
     maxtest <- gtools::defmacro(val,tot,max,str,expr={if(val/tot > max | (max >= 1 & val > max)) report(str)})
-    # perform the checks
+    ## perform the checks
     if(!missing(vartype))
         if(!(vartype==typeof(var)))
             report(paste0("Expected '",vartype,"' type but got '",typeof(var),"' type"))
@@ -552,34 +575,54 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
         mintest(len,1,min_len,paste("Length is <",min_len))
     if(!missing(max_len))
         maxtest(len,1,max_len,paste("Length is >",max_len))
-    if(isnumeric & !missing(min))
-        mintest(min(var,na.rm=TRUE),1,min,paste("Found values <",as.character(min)))
-    if(isnumeric & !missing(max))
-        maxtest(max(var,na.rm=TRUE),1,max,paste("Found values >",as.character(max)))
-    if(!missing(vals)|!missing(min_uniq)|!missing(max_uniq))
-        {
-            uvals <- uniqueNotNA(var)
-            ulen <- length(uvals)
-            if(!missing(vals))
-                {
-                    vals <- uniqueNotNA(vals)                    
-                    if((valstype=="all" & !setequal(vals,uvals))
-                       |(valstype=="subset" & !(all(vals %in% uvals)))
-                       |(valstype=="superset" & !(all(uvals %in% vals))))
-                        report("Invalid values")
-                }
-            if(!missing(min_uniq))
-                mintest(ulen,len,min_uniq,"Not enough unique values")
-            if(!missing(max_uniq))
-                maxtest(ulen,len,max_uniq,"Too many unique values")
+    if(isnumeric & !missing(min)) {
+        idxs <- which(var < min)
+        if(length(idxs) > 0) report(paste("Found values <",as.character(min)),idxs)
+    }
+    if(isnumeric & !missing(max)) {
+        idxs <- which(var > max)
+        if(length(idxs) > 0) report(paste("Found values >",as.character(max)),idxs)
+    }
+    if(!missing(vals)|!missing(min_uniq)|!missing(max_uniq)) {
+        uvals <- uniqueNotNA(var)
+        ulen <- length(uvals)
+        if(!missing(vals)) {
+            vals <- uniqueNotNA(vals)
+            ## TODO: fix so that indices are reported
+            if((valstype=="all" & !setequal(vals,uvals))) {
+                idxs <- which(!(uvals %in% vals))
+                diffvals <- setdiff(vals,uvals)
+                report("Invalid values",idxs)
+                report("Missing values",diffvals)
+            } else if((valstype=="subset" & !(all(vals %in% uvals)))) {
+                diffvals <- setdiff(vals,uvals)
+                report("Missing values",diffvals)
+            } else if((valstype=="superset" & !(all(uvals %in% vals)))) {
+                idxs <- which(!(uvals %in% vals))
+                report("Invalid values",idxs)
+            }
         }
+    }
+    if(!missing(charmatch)) {
+        if(class(var)!="character")
+            report(paste0("Expected 'character' mode for use with charmatch arg but got '",mode(var),"' mode"))
+        idxs <- which(!grepl(charmatch,var))
+        if(length(idxs) > 0)
+            report("Invalid values",idxs)
+    }
+    if(!missing(nocharmatch)) {
+        if(class(var)!="character")
+            report(paste0("Expected 'character' mode for use with charmatch arg but got '",mode(var),"' mode"))
+        idxs <- which(grepl(nocharmatch,var))
+        if(length(idxs) > 0)
+            report("Invalid values",idxs)
+    }
     if(!missing(max_na))
         maxtest(sum(is.na(var)),len,max_na,"Too many missing values")
-    if(!missing(pred))
-        {
-            if(!pred(var))
-                report(paste(deparse(substitute(pred)),"returns false"))
-        }
+    if(!missing(pred)) {
+        if(!pred(var))
+            report(paste(deparse(substitute(pred)),"returns false"))
+    }
     if(ok & !silent) print(paste("All checks passed for",varname,"variable"))
     return(ok)
 }

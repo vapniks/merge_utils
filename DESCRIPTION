@@ -16,3 +16,4 @@ Imports:
     plyr,
     car,
     stringdist
+RoxygenNote: 6.0.1
