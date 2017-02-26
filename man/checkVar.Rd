@@ -45,8 +45,8 @@ items as uniqueNotNA(var), if "subset"/"superset" then 'vals' should be a subset
 \item{pred}{(optional) A function which takes a variable as input and returns TRUE/FALSE depending on whether the
 variable is valid or not.}
 
-\item{showbadvals}{(optional) if a positive integer N then for each test on individual values print the first N
-non-matching values (default = 100)}
+\item{showbadvals}{(optional) if a positive integer N then print the first N non-matching values for each test
+on individual values (default: N = 100)}
 
 \item{silent}{(optional) if TRUE then don't omit warning messages informing of error type (FALSE by default)}
 

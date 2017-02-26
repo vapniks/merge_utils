@@ -508,8 +508,10 @@ matchByDistance <- function(distMat,onto=TRUE)
 ##' @param pred (optional) A function which takes a variable as input and returns TRUE/FALSE depending on whether the
 ##' variable is valid or not.
 ##' @param silent (optional) if TRUE then don't omit warning messages informing of error type (FALSE by default)
-##' @param showbadvals (optional) if a positive integer N then print the first N non-matching values for each test
-##' on individual values (default: N = 100)
+##' @param showbadvals (optional) if a positive integer N then print the first N non-matching values (only for tests
+##' on individual values. Default: N = 100).
+##' @param savebadidxs (optional) the name of a variable in which to store the indices of any non-matching values
+##' (only for tests on individual values).
 ##' @param stoponfail (optional) if TRUE then throw an error on the first check that fails (FALSE by default)
 ##' @return TRUE if all checks passed, FALSE otherwise.
 ##' @seealso \code{\link{checkDF}}, \code{\link{CurryL}}, \code{\link{apply}}
@@ -521,7 +523,7 @@ matchByDistance <- function(distMat,onto=TRUE)
 ##' @author Ben Veal
 ##' @export
 checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,vals,valstype="all",charmatch,nocharmatch,
-                     min_uniq,max_uniq,max_na,pred,showbadvals=100,silent=FALSE,stoponfail=FALSE)
+                     min_uniq,max_uniq,max_na,pred,showbadvals=100,savebadidxs,silent=FALSE,stoponfail=FALSE)
 {
     subvar <- substitute(var)
     if(is.symbol(subvar))
@@ -535,7 +537,7 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
     ok <- TRUE
     ## Useful functions and macros to save some typing
     is.positiveint <- function(x) (abs(x - round(x)) < .Machine$double.eps^0.5 & x > 0)
-    min2 <- function(x,y) {if (x<y) return(x) else return(y)} ## for some reason "min" doesnt work inside defmacro
+    min2 <- function(x,y) {if (x<y) return(x) else return(y)} # for some reason "min" doesnt work inside defmacro
     ## The following macro is used for reporting results of each test.
     ## str is a message, and idxs is the vector of indices where the test fails
     report <- gtools::defmacro(str,idxs=NULL,
@@ -577,11 +579,17 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
         maxtest(len,1,max_len,paste("Length is >",max_len))
     if(isnumeric & !missing(min)) {
         idxs <- which(var < min)
-        if(length(idxs) > 0) report(paste("Found values <",as.character(min)),idxs)
+        if(length(idxs) > 0) {
+            report(paste("Found values <",as.character(min)),idxs)
+            if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())
+        }
     }
     if(isnumeric & !missing(max)) {
         idxs <- which(var > max)
-        if(length(idxs) > 0) report(paste("Found values >",as.character(max)),idxs)
+        if(length(idxs) > 0) {
+            report(paste("Found values >",as.character(max)),idxs)
+            if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())
+        }
     }
     if(!missing(vals)|!missing(min_uniq)|!missing(max_uniq)) {
         uvals <- uniqueNotNA(var)
@@ -594,12 +602,14 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
                 diffvals <- setdiff(vals,uvals)
                 report("Invalid values",idxs)
                 report("Missing values",diffvals)
+                if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())
             } else if((valstype=="subset" & !(all(vals %in% uvals)))) {
                 diffvals <- setdiff(vals,uvals)
                 report("Missing values",diffvals)
             } else if((valstype=="superset" & !(all(uvals %in% vals)))) {
                 idxs <- which(!(uvals %in% vals))
                 report("Invalid values",idxs)
+                if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())
             }
         }
     }
@@ -607,15 +617,19 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
         if(class(var)!="character")
             report(paste0("Expected 'character' mode for use with charmatch arg but got '",mode(var),"' mode"))
         idxs <- which(!grepl(charmatch,var))
-        if(length(idxs) > 0)
+        if(length(idxs) > 0) {
             report("Invalid values",idxs)
+            if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())
+        }
     }
     if(!missing(nocharmatch)) {
         if(class(var)!="character")
             report(paste0("Expected 'character' mode for use with charmatch arg but got '",mode(var),"' mode"))
         idxs <- which(grepl(nocharmatch,var))
-        if(length(idxs) > 0)
+        if(length(idxs) > 0) {
             report("Invalid values",idxs)
+            if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())
+        }
     }
     if(!missing(max_na))
         maxtest(sum(is.na(var)),len,max_na,"Too many missing values")
