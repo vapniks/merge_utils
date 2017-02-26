@@ -45,15 +45,16 @@ items as uniqueNotNA(var), if "subset"/"superset" then 'vals' should be a subset
 \item{pred}{(optional) A function which takes a variable as input and returns TRUE/FALSE depending on whether the
 variable is valid or not.}
 
-\item{showbadvals}{(optional) if a positive integer N then print the first N non-matching values for each test
-on individual values (default: N = 100)}
+\item{showbadvals}{(optional) if a positive integer N then print the first N non-matching values (only for tests
+on individual values. Default: N = 100).}
 
 \item{silent}{(optional) if TRUE then don't omit warning messages informing of error type (FALSE by default)}
 
 \item{stoponfail}{(optional) if TRUE then throw an error on the first check that fails (FALSE by default)}
 }
 \value{
-TRUE if all checks passed, FALSE otherwise.
+A list whose first element is TRUE if all checks passed, FALSE otherwise, and whose subsequent elements
+are vectors of indices of non-matching values for tests on individual values.
 }
 \details{
 This function can be used after performing some data munging to check for mistakes.

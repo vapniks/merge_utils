@@ -510,10 +510,9 @@ matchByDistance <- function(distMat,onto=TRUE)
 ##' @param silent (optional) if TRUE then don't omit warning messages informing of error type (FALSE by default)
 ##' @param showbadvals (optional) if a positive integer N then print the first N non-matching values (only for tests
 ##' on individual values. Default: N = 100).
-##' @param savebadidxs (optional) the name of a variable in which to store the indices of any non-matching values
-##' (only for tests on individual values).
 ##' @param stoponfail (optional) if TRUE then throw an error on the first check that fails (FALSE by default)
-##' @return TRUE if all checks passed, FALSE otherwise.
+##' @return A list whose first element is TRUE if all checks passed, FALSE otherwise, and whose subsequent elements
+##' are vectors of indices of non-matching values for tests on individual values.
 ##' @seealso \code{\link{checkDF}}, \code{\link{CurryL}}, \code{\link{apply}}
 ##' @examples # create a function for checking variables in "ChickWeight" dataframe
 ##' checkalldata <- functional::CurryL(checkVar,data=ChickWeight)
@@ -523,18 +522,21 @@ matchByDistance <- function(distMat,onto=TRUE)
 ##' @author Ben Veal
 ##' @export
 checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,vals,valstype="all",charmatch,nocharmatch,
-                     min_uniq,max_uniq,max_na,pred,showbadvals=100,savebadidxs,silent=FALSE,stoponfail=FALSE)
+                     min_uniq,max_uniq,max_na,pred,showbadvals=100,silent=FALSE,stoponfail=FALSE)
 {
     subvar <- substitute(var)
     if(is.symbol(subvar))
         varname <- deparse(subvar)
     else if(is.character(subvar) & length(subvar)==1)
         varname <- var
-    else varname <- "unknown"
-    if(!missing(data)) var <- data[[varname]]
+    else
+        varname <- "unknown"
+    if(!missing(data))
+        var <- data[[varname]]
     isnumeric <- mode(var) == "numeric"
     len <- length(var)
     ok <- TRUE
+    badidxs <- list()
     ## Useful functions and macros to save some typing
     is.positiveint <- function(x) (abs(x - round(x)) < .Machine$double.eps^0.5 & x > 0)
     min2 <- function(x,y) {if (x<y) return(x) else return(y)} # for some reason "min" doesnt work inside defmacro
@@ -580,14 +582,14 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
     if(isnumeric & !missing(min)) {
         idxs <- which(var < min)
         if(length(idxs) > 0) {
-            if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())            
+            badidxs <- c(badidxs,list(min=idxs))
             report(paste("Found values <",as.character(min)),idxs)
         }
     }
     if(isnumeric & !missing(max)) {
         idxs <- which(var > max)
         if(length(idxs) > 0) {
-            if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())            
+            badidxs <- c(badidxs,list(max=idxs))
             report(paste("Found values >",as.character(max)),idxs)
         }
     }
@@ -599,7 +601,7 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
             if((valstype=="all" & !setequal(vals,uvals))) {
                 idxs <- which(!(uvals %in% vals))
                 diffvals <- setdiff(vals,uvals)
-                if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())                
+                badidxs <- c(badidxs,list(vals=idxs))
                 report("Invalid values",idxs)
                 report("Missing values",diffvals)
             } else if((valstype=="subset" & !(all(vals %in% uvals)))) {
@@ -607,9 +609,15 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
                 report("Missing values",diffvals)
             } else if((valstype=="superset" & !(all(uvals %in% vals)))) {
                 idxs <- which(!(uvals %in% vals))
-                if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())                
+                badidxs <- c(badidxs,list(vals=idxs))
                 report("Invalid values",idxs)
             }
+        }
+        if(!missing(min_uniq) & (ulen < min_uniq)) {
+            report("Not enough unique values")
+        }
+        if(!missing(max_uniq) & (ulen > max_uniq)) {
+            report("Too many unique values")
         }
     }
     if(!missing(charmatch)) {
@@ -617,7 +625,7 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
             report(paste0("Expected 'character' mode for use with charmatch arg but got '",mode(var),"' mode"))
         idxs <- which(!grepl(charmatch,var))
         if(length(idxs) > 0) {
-            if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())            
+            badidxs <- c(badidxs,list(charmatch=idxs))
             report("Invalid values",idxs)
 
         }
@@ -627,7 +635,7 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
             report(paste0("Expected 'character' mode for use with charmatch arg but got '",mode(var),"' mode"))
         idxs <- which(grepl(nocharmatch,var))
         if(length(idxs) > 0) {
-            if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())            
+            badidxs <- c(badidxs,list(nocharmatch=idxs))
             report("Invalid values",idxs)
         }
     }
@@ -638,7 +646,7 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
             report(paste(deparse(substitute(pred)),"returns false"))
     }
     if(ok & !silent) print(paste("All checks passed for",varname,"variable"))
-    return(ok)
+    return(c(ok,badidxs))
 }
 
 ##' @title Perform sanity checks on a dataframe. 
@@ -707,7 +715,7 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
     ncols2 <- dim(data)[2]
     ok <- TRUE
     ## useful functions and macros to save some typing
-    badvar <- function(x) {!as.logical(x)} # returns TRUE if x is a return value from checkVar that indicates the check failed
+    badvar <- function(x) {!as.logical(x[[1]])} # returns TRUE if x is a return value from checkVar that indicates the check failed
     report <- gtools::defmacro(str,expr={msg <- paste(str,"for",framename,"dataframe");
                                  if(stoponfail) stop(msg);
                                  if(!silent) print(msg);
