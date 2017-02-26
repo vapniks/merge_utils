@@ -542,7 +542,7 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
                                expr={msg <- paste(str,"for",varname);
                                    if(!silent) {
                                        cat(msg)
-                                       if(!missing(showbadvals) & is.positiveint(showbadvals) & !is.null(idxs)) {
+                                       if(is.positiveint(showbadvals) & !is.null(idxs)) {
                                            cat(":\n")
                                            cat(var[idxs[1:min2(showbadvals,length(idxs))]],sep=" ")
                                            if(showbadvals<length(idxs)) cat(" ... ")
@@ -684,11 +684,10 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
     nrows1 <- dim(data)[1]
     framename <- deparse(substitute(data))
     subsetstr <- deparse(substitute(subset))
-    if(subsetstr!="")
-        {
-            data <- data[with(data,eval(parse(text=subsetstr))),]
-            subsetmsg <- paste0("rows satisfying '",subsetstr,"'")
-        }
+    if(subsetstr!="") {
+        data <- data[with(data,eval(parse(text=subsetstr))),]
+        subsetmsg <- paste0("rows satisfying '",subsetstr,"'")
+    }
     else subsetmsg <- "rows"
     nrows2 <- dim(data)[1]
     ncols2 <- dim(data)[2]
@@ -740,9 +739,10 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
             if(class(vars[i])=="character") cols <- grep(vars[i],varnames)
             else cols <- vars[i]
             ## now check each column
-            for(j in cols)
+            for(j in cols) {
                 if(with(data,!do.call(checkVar,args=c(var=as.symbol(varnames[j]),checks))))
-                    ok <- FALSE 
+                    ok <- FALSE
+            }
         }
     }
     # finished all checks
