@@ -714,6 +714,7 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
     nrows2 <- dim(data)[1]
     ncols2 <- dim(data)[2]
     ok <- TRUE
+    badrows <- list()
     ## useful functions and macros to save some typing
     badvar <- function(x) {!as.logical(x[[1]])} # returns TRUE if x is a return value from checkVar that indicates the check failed
     report <- gtools::defmacro(str,expr={msg <- paste(str,"for",framename,"dataframe");
@@ -740,8 +741,9 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
     if(!missing(max_uniq))
         maxtest(dim(unique(data))[1],nrows2,max_uniq,"unique cases")
     if((!missing(max_na_row)) && is.numeric(max_na_row)) {
-        whichrows <- apply(data,1,function(x) {sum(is.na(x)) > max_na_row})
+        whichrows <- which(apply(data,1,function(x) {sum(is.na(x)) > max_na_row}))
         if(length(whichrows) > 0) {
+            badrows <- c(badrows,list(max_na_row=whichrows))
             report("Too many missing values in rows")
             print(whichrows)
         }
@@ -768,7 +770,7 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
     }
     # finished all checks
     if(ok & !silent) print(paste("All checks passed for",framename,"dataframe"))
-    return(ok)
+    return(c(ok,badrows))
 }
 
 ##' Given a dataframe df and a grouping variable idcol, this function finds which rows are the same across
