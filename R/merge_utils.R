@@ -580,15 +580,15 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
     if(isnumeric & !missing(min)) {
         idxs <- which(var < min)
         if(length(idxs) > 0) {
+            if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())            
             report(paste("Found values <",as.character(min)),idxs)
-            if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())
         }
     }
     if(isnumeric & !missing(max)) {
         idxs <- which(var > max)
         if(length(idxs) > 0) {
+            if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())            
             report(paste("Found values >",as.character(max)),idxs)
-            if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())
         }
     }
     if(!missing(vals)|!missing(min_uniq)|!missing(max_uniq)) {
@@ -596,20 +596,19 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
         ulen <- length(uvals)
         if(!missing(vals)) {
             vals <- uniqueNotNA(vals)
-            ## TODO: fix so that indices are reported
             if((valstype=="all" & !setequal(vals,uvals))) {
                 idxs <- which(!(uvals %in% vals))
                 diffvals <- setdiff(vals,uvals)
+                if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())                
                 report("Invalid values",idxs)
                 report("Missing values",diffvals)
-                if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())
             } else if((valstype=="subset" & !(all(vals %in% uvals)))) {
                 diffvals <- setdiff(vals,uvals)
                 report("Missing values",diffvals)
             } else if((valstype=="superset" & !(all(uvals %in% vals)))) {
                 idxs <- which(!(uvals %in% vals))
+                if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())                
                 report("Invalid values",idxs)
-                if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())
             }
         }
     }
@@ -618,8 +617,9 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
             report(paste0("Expected 'character' mode for use with charmatch arg but got '",mode(var),"' mode"))
         idxs <- which(!grepl(charmatch,var))
         if(length(idxs) > 0) {
+            if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())            
             report("Invalid values",idxs)
-            if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())
+
         }
     }
     if(!missing(nocharmatch)) {
@@ -627,8 +627,8 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
             report(paste0("Expected 'character' mode for use with charmatch arg but got '",mode(var),"' mode"))
         idxs <- which(grepl(nocharmatch,var))
         if(length(idxs) > 0) {
+            if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())            
             report("Invalid values",idxs)
-            if(!missing(savebadidxs)) assign(savebadidxs,idxs,pos=parent.frame())
         }
     }
     if(!missing(max_na))
@@ -680,7 +680,7 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
 ##' @param max_cc (optional) maximum number of complete cases (compare with sum(complete.cases(data[subset,])))
 ##' @param min_uniq (optional) minimum number of unique cases (compare with dim(unique(data[subset,]))[1]). Default value is 1.
 ##' @param max_uniq (optional) maximum number of unique cases (compare with dim(unique(data[subset,]))[1])
-##' @param max_na_row (optional) maximum number of missing values for each row
+##' @param max_na_col (optional) maximum number of missing values for each column
 ##' @param max_na_all (optional) maximum number of missing values overall
 ##' @param silent (optional) if TRUE then don't omit warning messages informing of error type (FALSE by default)
 ##' @param stoponfail (optional) if TRUE then throw an error on the first check that fails (FALSE by default)
@@ -693,7 +693,7 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
 ##' @author Ben Veal
 ##' @export 
 checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uniq,
-                    max_na_row,max_na_all,silent=FALSE,stoponfail=FALSE,vars=NULL,checks=NULL)
+                    max_na_col,max_na_all,silent=FALSE,stoponfail=FALSE,vars=NULL,checks=NULL)
 {
     nrows1 <- dim(data)[1]
     framename <- deparse(substitute(data))
@@ -706,7 +706,8 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
     nrows2 <- dim(data)[1]
     ncols2 <- dim(data)[2]
     ok <- TRUE
-    # useful macros to save some typing
+    ## useful functions and macros to save some typing
+    badvar <- function(x) {!as.logical(x)} # returns TRUE if x is a return value from checkVar that indicates the check failed
     report <- gtools::defmacro(str,expr={msg <- paste(str,"for",framename,"dataframe");
                                  if(stoponfail) stop(msg);
                                  if(!silent) print(msg);
@@ -718,7 +719,7 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
         mintest(nrows2,nrows1,min_rows,subsetmsg)
     # if only the 'subset' & 'data' args are supplied then just check that all rows satisfy the 'subset' expression
     else if(subsetstr!="" & missing(max_rows) & missing(min_cc) & missing(max_cc) & missing(min_uniq) & missing(max_uniq)
-             & missing(max_na_row) & missing(max_na_all) & length(vars)==0)
+             & missing(max_na_col) & missing(max_na_all) & length(vars)==0)
         mintest(nrows2,nrows1,nrows1,subsetmsg)
     if(!missing(max_rows))
         maxtest(nrows2,nrows1,max_rows,subsetmsg)
@@ -730,15 +731,14 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
         mintest(dim(unique(data))[1],nrows2,min_uniq,"unique cases")
     if(!missing(max_uniq))
         maxtest(dim(unique(data))[1],nrows2,max_uniq,"unique cases")
-    if(!missing(max_na_row))
-        {
-            whichrows <- which(!apply(data,2,function(x){checkVar(x,max_na=max_na_row)}))
-            if(length(whichrows) > 0)
-                {
-                    report("Too many missing values in rows")
-                    whichrows[1:min(length(whichrows),10)]
-                }
+    if(!missing(max_na_col)) {
+        retvals <- apply(data,2,function(x){checkVar(x,max_na=max_na_col)})
+        whichcols <- which(sapply(retvals,badvar))
+        if(length(whichcols) > 0) {
+            report("Too many missing values in columns")
+            print(whichcols)
         }
+    }
     if(!missing(max_na_all))
         maxtest(sum(is.na(data)),nrows2*ncols2,max_na_all,"missing values")
     # do variable specific checks
@@ -754,8 +754,8 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
             else cols <- vars[i]
             ## now check each column
             for(j in cols) {
-                if(with(data,!do.call(checkVar,args=c(var=as.symbol(varnames[j]),checks))))
-                    ok <- FALSE
+                retval <- with(data,do.call(checkVar,args=c(var=as.symbol(varnames[j]),checks)))
+                if(badvar(retval)) ok <- FALSE
             }
         }
     }
