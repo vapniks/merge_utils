@@ -688,7 +688,7 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
 ##' @param max_cc (optional) maximum number of complete cases (compare with sum(complete.cases(data[subset,])))
 ##' @param min_uniq (optional) minimum number of unique cases (compare with dim(unique(data[subset,]))[1]). Default value is 1.
 ##' @param max_uniq (optional) maximum number of unique cases (compare with dim(unique(data[subset,]))[1])
-##' @param max_na_col (optional) maximum number of missing values for each column
+##' @param max_na_row (optional) maximum number of missing values in each row
 ##' @param max_na_all (optional) maximum number of missing values overall
 ##' @param silent (optional) if TRUE then don't omit warning messages informing of error type (FALSE by default)
 ##' @param stoponfail (optional) if TRUE then throw an error on the first check that fails (FALSE by default)
@@ -701,7 +701,7 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
 ##' @author Ben Veal
 ##' @export 
 checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uniq,
-                    max_na_col,max_na_all,silent=FALSE,stoponfail=FALSE,vars=NULL,checks=NULL)
+                    max_na_row,max_na_all,silent=FALSE,stoponfail=FALSE,vars=NULL,checks=NULL)
 {
     nrows1 <- dim(data)[1]
     framename <- deparse(substitute(data))
@@ -727,7 +727,7 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
         mintest(nrows2,nrows1,min_rows,subsetmsg)
     # if only the 'subset' & 'data' args are supplied then just check that all rows satisfy the 'subset' expression
     else if(subsetstr!="" & missing(max_rows) & missing(min_cc) & missing(max_cc) & missing(min_uniq) & missing(max_uniq)
-             & missing(max_na_col) & missing(max_na_all) & length(vars)==0)
+             & missing(max_na_row) & missing(max_na_all) & length(vars)==0)
         mintest(nrows2,nrows1,nrows1,subsetmsg)
     if(!missing(max_rows))
         maxtest(nrows2,nrows1,max_rows,subsetmsg)
@@ -739,12 +739,11 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
         mintest(dim(unique(data))[1],nrows2,min_uniq,"unique cases")
     if(!missing(max_uniq))
         maxtest(dim(unique(data))[1],nrows2,max_uniq,"unique cases")
-    if(!missing(max_na_col)) {
-        retvals <- apply(data,2,function(x){checkVar(x,max_na=max_na_col)})
-        whichcols <- which(sapply(retvals,badvar))
-        if(length(whichcols) > 0) {
-            report("Too many missing values in columns")
-            print(whichcols)
+    if((!missing(max_na_row)) && is.numeric(max_na_row)) {
+        whichrows <- apply(data,1,function(x) {sum(is.na(x)) > max_na_row})
+        if(length(whichrows) > 0) {
+            report("Too many missing values in rows")
+            print(whichrows)
         }
     }
     if(!missing(max_na_all))
