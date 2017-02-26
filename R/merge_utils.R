@@ -694,7 +694,8 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
 ##' @param stoponfail (optional) if TRUE then throw an error on the first check that fails (FALSE by default)
 ##' @param vars (optional) either a numeric or character vector, or a regexp matching names of variables to check
 ##' @param checks (optional) a list of a arguments to be passed to \code{\link{checkVar}}
-##' @return TRUE if all checks passed, FALSE otherwise
+##' @return A list whose first element is TRUE if all checks passed, FALSE otherwise, and whose subsequent elements
+##' are vectors of indices of non-matching rows for tests on rows.
 ##' @examples checkDF(ChickWeight,weight>Time)
 ##' checkDF(ChickWeight,min_uniq=10)
 ##' @seealso \code{\link{checkVar}}

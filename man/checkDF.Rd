@@ -5,7 +5,7 @@
 \title{Perform sanity checks on a dataframe.}
 \usage{
 checkDF(data, subset, min_rows, max_rows, min_cc, max_cc, min_uniq, max_uniq,
-  max_na_col, max_na_all, silent = FALSE, stoponfail = FALSE, vars = NULL,
+  max_na_row, max_na_all, silent = FALSE, stoponfail = FALSE, vars = NULL,
   checks = NULL)
 }
 \arguments{
@@ -25,7 +25,7 @@ checkDF(data, subset, min_rows, max_rows, min_cc, max_cc, min_uniq, max_uniq,
 
 \item{max_uniq}{(optional) maximum number of unique cases (compare with dim(unique(data[subset,]))[1])}
 
-\item{max_na_col}{(optional) maximum number of missing values for each column}
+\item{max_na_row}{(optional) maximum number of missing values in each row}
 
 \item{max_na_all}{(optional) maximum number of missing values overall}
 
@@ -38,7 +38,8 @@ checkDF(data, subset, min_rows, max_rows, min_cc, max_cc, min_uniq, max_uniq,
 \item{checks}{(optional) a list of a arguments to be passed to \code{\link{checkVar}}}
 }
 \value{
-TRUE if all checks passed, FALSE otherwise
+A list whose first element is TRUE if all checks passed, FALSE otherwise, and whose subsequent elements
+are vectors of indices of non-matching rows for tests on rows.
 }
 \details{
 This function can be used after performing some data munging to check for mistakes.
