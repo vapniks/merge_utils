@@ -28,6 +28,9 @@ When default=NULL, non-matching values of x will be kept in the output.}
 \value{
 A vector
 }
+\description{
+Recode values of variable/factor matching patterns
+}
 \details{
 This function is like 'recodeVar' except that it uses regular expressions to match
 the source variables (using 'grepl'). For each unique value of 'x' the regexps in 'patterns' are

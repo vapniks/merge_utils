@@ -38,12 +38,14 @@ checkDF(data, subset, min_rows, max_rows, min_cc, max_cc, min_uniq, max_uniq,
 \item{checks}{(optional) a list of a arguments to be passed to \code{\link{checkVar}}}
 }
 \value{
-A list whose first element is TRUE if all checks passed, FALSE otherwise, and whose subsequent elements
-are vectors of indices of non-matching rows for tests on rows.
+A list whose first element is TRUE if all checks passed, FALSE otherwise, and whose subsequent elements are vectors of indices of non-matching rows for tests on rows.
+}
+\description{
+Perform sanity checks on a dataframe.
+
+This function can be used after performing some data munging to check for mistakes.
 }
 \details{
-This function can be used after performing some data munging to check for mistakes.
-
 You can restrict the checks to a subset of the dataframe by supplying a logical expression in the 'subset'
 argument. This expression will be evaluated in the context of the supplied dataframe (the 'data' argument),
 so you don't need to qualify the variable names. If all arguments apart from 'data', 'subset', 'silent' and 'stoponfail'

@@ -14,6 +14,9 @@ uniqueNotNA(x, warn = FALSE)
 \value{
 The unique values of 'x' with NA & NaN values removed.
 }
+\description{
+Like 'unique' but omits NA's or NaN's, suppresses warnings, and returns result as character vector.
+}
 \author{
 Ben Veal
 }

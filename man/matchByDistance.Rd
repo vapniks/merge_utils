@@ -15,6 +15,9 @@ first set of things and the j'th element of the second set of things.}
 \value{
 A vector whose i'th entry indicates the element in the 2nd set matching the i'th element in the 1st set.
 }
+\description{
+Match elements of one set with closest elements of another set, according to their mutual distances.
+}
 \details{
 This function tries to match elements of one set with the closest elements of another set according
 to the distances between these elements as supplied by 'distMat'.

@@ -16,6 +16,9 @@ matchStrings(A, B, onto = TRUE)
 \value{
 A vector whose i'th entry indicates the element of B that matches the i'th element of A
 }
+\description{
+Match strings in A with strings in B
+}
 \details{
 This function tries to match the strings in 'A' to the closest ones in 'B'.
 By default it tries to ensure that every element of 'B' is matched by at least one element of 'A'.

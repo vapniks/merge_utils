@@ -16,6 +16,9 @@ character strings, character vectors or formula objects.}
 A logical vector indicating which rows of df have no missing values for the variables passed in '...'
 Note: currently this doesn't work for formulas which specify instruments (i.e. containing a | symbol)
 }
+\description{
+Find complete cases/rows of data.frame with respect to a set of variables.
+}
 \details{
 The row numbers of 'df' for which there are no missing values in any of the columns indicated by '...' are
 returned.

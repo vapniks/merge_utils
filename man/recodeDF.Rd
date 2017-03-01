@@ -18,6 +18,9 @@ recodeDF(df, sPatterns, sTargets = NA, nRecodes)
 \value{
 a dataframe (recoded)
 }
+\description{
+Recode collection of variables so that they all have the same unique values.
+}
 \details{
 This is a wrapper around \code{\link{recodeMatches}} & \code{\link{recode}} (in library(car))
 for recoding all strings and numbers variables in a dataframe.

@@ -14,6 +14,9 @@ recodeAs(A, B)
 \value{
 The recoded version of 'A'
 }
+\description{
+Recode unique values of one variable to match unique values of another variable.
+}
 \details{
 This function is a wrapper around \code{\link{recodeVar}}. It can be used when you need to
 recode a character variable/factor so that the values correspond with those of another variable

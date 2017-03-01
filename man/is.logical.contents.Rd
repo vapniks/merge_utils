@@ -12,6 +12,9 @@ is.logical.contents(x)
 \value{
 TRUE or FALSE
 }
+\description{
+Test if contents of vector or factor are logical (TRUE/FALSE) values.
+}
 \details{
 Unlike \code{\link{is.character}} this works with factors.
 }

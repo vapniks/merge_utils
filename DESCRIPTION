@@ -1,11 +1,11 @@
 Package: mergeutils
 Type: Package
-Title: Functions to aid merging disparate data
+Title: Functions to aid merging and checking disparate data
 Version: 1.1
 Date: 2014-10-29
 Author: Joe Bloggs
 Maintainer: Who to complain to <vapniks@yahoo.com>
-Description: Functions to aid merging disparate data
+Description: Functions to aid merging and checking disparate data.
 License: GNU GPLv3
 Collate:
     'merge_utils.R'

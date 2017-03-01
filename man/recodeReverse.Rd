@@ -12,6 +12,9 @@ recodeReverse(var)
 \value{
 The recoded variable with codes reversed.
 }
+\description{
+Recode an ordered variable by reversing the codes.
+}
 \details{
 Given a variable of integer codes (e.g. measured on a Likert scale), or an ordered factor, this function
 will recode the variable with the codes reversed, and return the result.

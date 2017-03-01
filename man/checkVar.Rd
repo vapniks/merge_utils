@@ -45,20 +45,21 @@ items as uniqueNotNA(var), if "subset"/"superset" then 'vals' should be a subset
 \item{pred}{(optional) A function which takes a variable as input and returns TRUE/FALSE depending on whether the
 variable is valid or not.}
 
-\item{showbadvals}{(optional) if a positive integer N then print the first N non-matching values (only for tests
-on individual values. Default: N = 100).}
+\item{showbadvals}{(optional) if a positive integer N then print the first N non-matching values (only for tests on individual values. Default: N = 100).}
 
 \item{silent}{(optional) if TRUE then don't omit warning messages informing of error type (FALSE by default)}
 
 \item{stoponfail}{(optional) if TRUE then throw an error on the first check that fails (FALSE by default)}
 }
 \value{
-A list whose first element is TRUE if all checks passed, FALSE otherwise, and whose subsequent elements
-are vectors of indices of non-matching values for tests on individual values.
+A list whose first element is TRUE if all checks passed, FALSE otherwise, and whose subsequent elements are vectors of indices of non-matching values for tests on individual values.
+}
+\description{
+Perform sanity checks on a single variable.
+
+This function can be used after performing some data munging to check for mistakes.
 }
 \details{
-This function can be used after performing some data munging to check for mistakes.
-
 You can check the data type, class, mode, length, max, min, unique, or missing values.
 You can also supply your own function to check the variable.
 For the 'min_uniq', 'max_uniq' and 'max_na' variables, you can supply either a whole number indicating

@@ -22,6 +22,8 @@ a list of vectors indicating duplicated rows of dataframes
 Find rows that are duplicated across dataframes
 }
 \details{
+Find rows that are duplicated across dataframes
+
 This is just a wrapper around \code{\link{dupsBetweenGroups}} (which see),
 but for separate dataframes instead of groups within a single dataframe.
 

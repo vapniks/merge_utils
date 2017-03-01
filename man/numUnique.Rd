@@ -14,6 +14,9 @@ numUnique(x, warn = FALSE)
 \value{
 The number of unique values of 'x' excluding NA & NaN values.
 }
+\description{
+Return the number of unique elements of x (excluding NA & NaN's)
+}
 \author{
 Ben Veal
 }

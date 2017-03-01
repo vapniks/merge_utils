@@ -12,6 +12,9 @@
 \value{
 TRUE or FALSE
 }
+\description{
+Test if contents of vector or factor are numeric values.
+}
 \details{
 Unlike \code{\link{is.character}} this works with factors, and will also return TRUE if the
 contents are strings containing only numbers.

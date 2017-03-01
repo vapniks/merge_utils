@@ -2,8 +2,7 @@
 % Please edit documentation in R/merge_utils.R
 \name{colwise2}
 \alias{colwise2}
-\title{Like \code{\link{colwise}}, but the returned function will return unaffected columns alongside affected ones
-if possible.}
+\title{Like \code{\link{colwise}}, but the returned function will return unaffected columns alongside affected ones}
 \usage{
 colwise2(.fun, .cols = true, ...)
 }
@@ -17,6 +16,10 @@ colwise2(.fun, .cols = true, ...)
 \value{
 A function which accepts a dataframe as argument and applies '.fun' to each of the columns specified in '.cols'.
 Further arguments to the function will be passed on to '.fun'.
+}
+\description{
+Like \code{\link{colwise}}, but the returned function will return unaffected columns alongside affected ones
+if possible.
 }
 \details{
 This function works like \code{\link{colwise}} except that the function it returns also returns the columns

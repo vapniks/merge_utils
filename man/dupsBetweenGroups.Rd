@@ -18,12 +18,14 @@ be duplicated across 2 groups}
 A logical vector indicating which rows of df are duplicated between groups
 }
 \description{
+Find rows of dataframe that are duplicated between groups (indicated by a grouping variable).
+}
+\details{
 Given a dataframe df and a grouping variable idcol, this function finds which rows are the same across
 different groups, i.e. a row will be chosen if it is identical to another row on all variables apart from
 the idcol variable which should be different. If `matchall' is TRUE then only rows which are the same
 across all groups will be chosen, otherwise rows which are the same across at least 2 groups are reported.
-}
-\details{
+
 This function uses code by Winston Chang pinched from here:
       http://www.cookbook-r.com/Manipulating_data/Comparing_data_frames/
 }

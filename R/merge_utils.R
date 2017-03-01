@@ -1,6 +1,7 @@
 .packageName <- "mergeutils"
 
 ##' @title Find complete cases/rows of data.frame with respect to a set of variables.
+##' @description Find complete cases/rows of data.frame with respect to a set of variables.
 ##' @details The row numbers of 'df' for which there are no missing values in any of the columns indicated by '...' are
 ##' returned.
 ##' The arguments passed in '...' may be character strings, character vectors or formula objects. For formula objects
@@ -34,6 +35,7 @@ complete.cases2 <- function(...,df)
 
 ## TODO - check it works, I think it still needs work
 ##' @title Merge multiple dataframe by common columns.
+##' @description Merge multiple dataframe by common columns.
 ##' @details Given a list of dataframes, and a list of vectors each of which contains the same number column names/numbers,
 ##' merge the dataframes by matching on the corresponding columns.
 ##' The 'by' argument specifies, for each dataframe, which columns to use for matching - it should be a list of numeric or
@@ -111,6 +113,7 @@ multimerge <- function(data,by=NULL,all=NULL,suffixes=NULL) {
 }
 
 ##' @title Like 'unique' but omits NA's or NaN's, suppresses warnings, and returns result as character vector.
+##' @description Like 'unique' but omits NA's or NaN's, suppresses warnings, and returns result as character vector.
 ##' @param x A vector.
 ##' @param warn Whether to issue warnings from 'unique' (default is FALSE).
 ##' @return The unique values of 'x' with NA & NaN values removed.
@@ -127,6 +130,7 @@ uniqueNotNA <- function(x,warn=FALSE)
 }
 
 ##' @title Internal function used by 'contents'
+##' @description Internal function used by 'contents'
 ##' @param x 
 ##' @return A string
 ##' @author Ben Veal
@@ -142,6 +146,7 @@ uniqueNotNA <- function(x,warn=FALSE)
 }
 
 ##' @title Find contents of variables/factors - either "numeric", "logical" or "character"
+##' @description Find contents of variables/factors - either "numeric", "logical" or "character"
 ##' @details If 'x' is a vector or matrix then a single string is returned, if 'x' is a list or
 ##' dataframe then a character vector is returned with each entry indicating the contents of the
 ##' corresponding element/column.
@@ -163,6 +168,7 @@ contents <- function(x)
 }
 
 ##' @title Test if contents of vector or factor are character/string values.
+##' @description Test if contents of vector or factor are character/string values.
 ##' @details Unlike \code{\link{is.character}} this works with factors.
 ##' @param x 
 ##' @return TRUE or FALSE
@@ -175,6 +181,7 @@ is.character.contents <- function(x)
 }
 
 ##' @title Test if contents of vector or factor are numeric values.
+##' @description Test if contents of vector or factor are numeric values.
 ##' @details Unlike \code{\link{is.character}} this works with factors, and will also return TRUE if the
 ##' contents are strings containing only numbers.
 ##' @param x 
@@ -188,6 +195,7 @@ is.numeric.contents <- function(x)
 }
 
 ##' @title Test if contents of vector or factor are logical (TRUE/FALSE) values.
+##' @description Test if contents of vector or factor are logical (TRUE/FALSE) values.
 ##' @details Unlike \code{\link{is.character}} this works with factors.
 ##' @param x 
 ##' @return TRUE or FALSE
@@ -200,6 +208,7 @@ is.logical.contents <- function(x)
 }
 
 ##' @title Internal function used by 'unfactor' 
+##' @description Internal function used by 'unfactor' 
 ##' @param x 
 ##' @return A vector
 ##' @author Ben Veal
@@ -219,6 +228,7 @@ is.logical.contents <- function(x)
 }
 
 ##' @title Convert factors into numeric/character/logical vectors.
+##' @description Convert factors into numeric/character/logical vectors.
 ##' @details This function converts factor vectors into a numeric, character or logical vectors
 ##' depending on the contents. If 'x' is a list or dataframe then any constituent factors will
 ##' be converted.
@@ -239,6 +249,7 @@ unfactor <- function(x)
 }
 
 ##' @title Recode an ordered variable by reversing the codes.
+##' @description Recode an ordered variable by reversing the codes.
 ##' @details Given a variable of integer codes (e.g. measured on a Likert scale), or an ordered factor, this function
 ##' will recode the variable with the codes reversed, and return the result.
 ##' @param var The variable containing the codes to be reversed.
@@ -259,6 +270,7 @@ recodeReverse <- function(var)
 }
 
 ##' @title Recode values of variable/factor matching patterns
+##' @description Recode values of variable/factor matching patterns
 ##' @details This function is like 'recodeVar' except that it uses regular expressions to match
 ##' the source variables (using 'grepl'). For each unique value of 'x' the regexps in 'patterns' are
 ##' tried in turn until a match is found, then the corresponding element of 'targets' is used to recode
@@ -305,6 +317,7 @@ recodeMatches <- function(x,patterns,targets,default=NULL,keep.na=TRUE,ignore.ca
 }
 
 ##' @title Recode unique values of one variable to match unique values of another variable.
+##' @description Recode unique values of one variable to match unique values of another variable.
 ##' @details This function is a wrapper around \code{\link{recodeVar}}. It can be used when you need to
 ##' recode a character variable/factor so that the values correspond with those of another variable
 ##' (e.g. when merging datasets with slightly different value labels).
@@ -330,6 +343,7 @@ recodeAs <- function(A,B)
 }
 
 ##' @title Recode collection of variables so that they all have the same unique values.
+##' @description Recode collection of variables so that they all have the same unique values.
 ##' @details This is a wrapper around \code{\link{recodeMatches}} & \code{\link{recode}} (in library(car))
 ##' for recoding all strings and numbers variables in a dataframe.
 ##' @param df A dataframe to recode
@@ -347,6 +361,7 @@ recodeDF <- function(df,sPatterns,sTargets=NA,nRecodes)
 }
 
 ##' @title Recode variables in dataframe to match codes in another dataframe
+##' @description Recode variables in dataframe to match codes in another dataframe
 ##' @details This is a wrapper around \code{\link{recodeAs}}.
 ##' Each variable of 'df1' listed in 'cols1' will be recoded to the corresponding variable of 'df2'
 ##' listed in 'cols2'. If length(cols2) < length(cols1) then the final variable in 'cols2' will be
@@ -372,6 +387,7 @@ recodeDFas <- function(df1,df2,cols1,cols2=cols1)
 }
 
 ##' @title Like \code{\link{colwise}}, but the returned function will return unaffected columns alongside affected ones
+##' @description Like \code{\link{colwise}}, but the returned function will return unaffected columns alongside affected ones
 ##' if possible.
 ##' @details This function works like \code{\link{colwise}} except that the function it returns also returns the columns
 ##' not specified by the '.cols' argument (as long as they are compatible). If the unaffected columns have a different
@@ -403,6 +419,7 @@ colwise2 <- function(.fun,.cols=true,...)
 }
 
 ##' @title Match strings in A with strings in B
+##' @description Match strings in A with strings in B
 ##' @details This function tries to match the strings in 'A' to the closest ones in 'B'.
 ##' By default it tries to ensure that every element of 'B' is matched by at least one element of 'A'.
 ##' So if 'A' and 'B' have the same length it calculates an exact pairwise matching between 'A' & 'B'.
@@ -423,6 +440,7 @@ matchStrings <- function(A,B,onto=TRUE)
 }
 
 ##' @title Match elements of one set with closest elements of another set, according to their mutual distances.
+##' @description Match elements of one set with closest elements of another set, according to their mutual distances.
 ##' @details This function tries to match elements of one set with the closest elements of another set according
 ##' to the distances between these elements as supplied by 'distMat'.
 ##' By default it tries to ensure that every element of the second set (corresponding to the columns of 'distMat')
@@ -477,8 +495,9 @@ matchByDistance <- function(distMat,onto=TRUE)
 }
 
 ##' @title Perform sanity checks on a single variable.
-##' @details This function can be used after performing some data munging to check for mistakes.
-##' 
+##' @description Perform sanity checks on a single variable.
+##' @description This function can be used after performing some data munging to check for mistakes.
+##' @details 
 ##' You can check the data type, class, mode, length, max, min, unique, or missing values.
 ##' You can also supply your own function to check the variable.
 ##' For the 'min_uniq', 'max_uniq' and 'max_na' variables, you can supply either a whole number indicating
@@ -508,11 +527,9 @@ matchByDistance <- function(distMat,onto=TRUE)
 ##' @param pred (optional) A function which takes a variable as input and returns TRUE/FALSE depending on whether the
 ##' variable is valid or not.
 ##' @param silent (optional) if TRUE then don't omit warning messages informing of error type (FALSE by default)
-##' @param showbadvals (optional) if a positive integer N then print the first N non-matching values (only for tests
-##' on individual values. Default: N = 100).
+##' @param showbadvals (optional) if a positive integer N then print the first N non-matching values (only for tests on individual values. Default: N = 100).
 ##' @param stoponfail (optional) if TRUE then throw an error on the first check that fails (FALSE by default)
-##' @return A list whose first element is TRUE if all checks passed, FALSE otherwise, and whose subsequent elements
-##' are vectors of indices of non-matching values for tests on individual values.
+##' @return A list whose first element is TRUE if all checks passed, FALSE otherwise, and whose subsequent elements are vectors of indices of non-matching values for tests on individual values.
 ##' @seealso \code{\link{checkDF}}, \code{\link{CurryL}}, \code{\link{apply}}
 ##' @examples # create a function for checking variables in "ChickWeight" dataframe
 ##' checkalldata <- functional::CurryL(checkVar,data=ChickWeight)
@@ -613,11 +630,15 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
                 report("Invalid values",idxs)
             }
         }
-        if(!missing(min_uniq) & (ulen < min_uniq)) {
-            report("Not enough unique values")
+        if(!missing(min_uniq)) {
+            if(ulen < min_uniq) {
+                report("Not enough unique values")
+            }
         }
-        if(!missing(max_uniq) & (ulen > max_uniq)) {
-            report("Too many unique values")
+        if(!missing(max_uniq)) {
+            if(ulen > max_uniq) {
+                report("Too many unique values")
+            }
         }
     }
     if(!missing(charmatch)) {
@@ -650,8 +671,9 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
 }
 
 ##' @title Perform sanity checks on a dataframe. 
-##' @details This function can be used after performing some data munging to check for mistakes.
-##' 
+##' @description Perform sanity checks on a dataframe. 
+##' @description This function can be used after performing some data munging to check for mistakes.
+##' @details
 ##' You can restrict the checks to a subset of the dataframe by supplying a logical expression in the 'subset'
 ##' argument. This expression will be evaluated in the context of the supplied dataframe (the 'data' argument),
 ##' so you don't need to qualify the variable names. If all arguments apart from 'data', 'subset', 'silent' and 'stoponfail'
@@ -694,8 +716,7 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
 ##' @param stoponfail (optional) if TRUE then throw an error on the first check that fails (FALSE by default)
 ##' @param vars (optional) either a numeric or character vector, or a regexp matching names of variables to check
 ##' @param checks (optional) a list of a arguments to be passed to \code{\link{checkVar}}
-##' @return A list whose first element is TRUE if all checks passed, FALSE otherwise, and whose subsequent elements
-##' are vectors of indices of non-matching rows for tests on rows.
+##' @return A list whose first element is TRUE if all checks passed, FALSE otherwise, and whose subsequent elements are vectors of indices of non-matching rows for tests on rows.
 ##' @examples checkDF(ChickWeight,weight>Time)
 ##' checkDF(ChickWeight,min_uniq=10)
 ##' @seealso \code{\link{checkVar}}
@@ -705,7 +726,12 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
                     max_na_row,max_na_all,silent=FALSE,stoponfail=FALSE,vars=NULL,checks=NULL)
 {
     nrows1 <- dim(data)[1]
-    framename <- deparse(substitute(data))
+    stopifnot(nrows1>0)
+    if(is.expression(data)) {
+        framename <- deparse(substitute(data))
+    } else {
+        framename <- "unknown"
+    }
     subsetstr <- deparse(substitute(subset))
     if(subsetstr!="") {
         data <- data[with(data,eval(parse(text=subsetstr))),]
@@ -782,6 +808,7 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
 ##' This function uses code by Winston Chang pinched from here:
 ##'       http://www.cookbook-r.com/Manipulating_data/Comparing_data_frames/
 ##' @title Find rows of dataframe that are duplicated between groups (indicated by a grouping variable).
+##' @description Find rows of dataframe that are duplicated between groups (indicated by a grouping variable).
 ##' @param df A dataframe
 ##' @param idcol The name/index of the grouping variable
 ##' @param matchall If TRUE then find rows that are duplicated across ALL groups, otherwise a row only need
@@ -828,6 +855,7 @@ dupsBetweenGroups <- function(df,idcol,matchall=FALSE) {
 ##'
 ##' This function was pinched from here: http://www.cookbook-r.com/Manipulating_data/Comparing_data_frames/
 ##' @title Internal function used by \code{\link{dupsBetweenGroups}} (which see)
+##' @description Internal function used by \code{\link{dupsBetweenGroups}} (which see)
 ##' @param df A dataframe
 ##' @param idcol The name of the grouping variable
 ##' @return A logical vector indicating which rows of df are duplicated between groups
@@ -893,6 +921,7 @@ dupsBetweenGroups <- function(df,idcol,matchall=FALSE) {
 ##' or numeric vector means use the columns indicated by that vector.
 ##'
 ##' @title Find rows that are duplicated across dataframes
+##' @description Find rows that are duplicated across dataframes
 ##' @param dfs a list of dataframes to compare
 ##' @param by a list of vectors each of which indicates which columns to use for
 ##' the corresponding dataframe in 'dfs'. A NULL value means use all columns.
@@ -936,6 +965,7 @@ dupsBetweenDFs <- function(dfs,by=NULL,matchall=FALSE) {
 
 
 ##' @title Return the number of unique elements of x (excluding NA & NaN's)
+##' @description Return the number of unique elements of x (excluding NA & NaN's)
 ##' @param x A vector.
 ##' @param warn Whether to issue warnings from 'unique' (default is FALSE).
 ##' @return The number of unique values of 'x' excluding NA & NaN values.

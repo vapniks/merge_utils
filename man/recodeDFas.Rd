@@ -18,6 +18,9 @@ recodeDFas(df1, df2, cols1, cols2 = cols1)
 \value{
 a dataframe (recoded version of 'df1')
 }
+\description{
+Recode variables in dataframe to match codes in another dataframe
+}
 \details{
 This is a wrapper around \code{\link{recodeAs}}.
 Each variable of 'df1' listed in 'cols1' will be recoded to the corresponding variable of 'df2'

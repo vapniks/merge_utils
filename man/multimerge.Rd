@@ -22,6 +22,9 @@ in order to indicate the original dataframe.}
 \value{
 A single dataframe containing the merged data.
 }
+\description{
+Merge multiple dataframe by common columns.
+}
 \details{
 Given a list of dataframes, and a list of vectors each of which contains the same number column names/numbers,
 merge the dataframes by matching on the corresponding columns.
