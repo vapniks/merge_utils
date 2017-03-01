@@ -5,8 +5,8 @@
 \title{Perform sanity checks on a dataframe.}
 \usage{
 checkDF(data, subset, min_rows, max_rows, min_cols, max_cols, min_cc, max_cc,
-  min_uniq, max_uniq, max_na_row, max_na_all, silent = FALSE,
-  stoponfail = FALSE, vars = NULL, checks = NULL)
+  min_uniq, max_uniq, min_na_row, max_na_row, min_na_all, max_na_all,
+  silent = FALSE, stoponfail = FALSE, vars = NULL, checks = NULL)
 }
 \arguments{
 \item{data}{dataframe to be checked}
@@ -29,7 +29,11 @@ checkDF(data, subset, min_rows, max_rows, min_cols, max_cols, min_cc, max_cc,
 
 \item{max_uniq}{(optional) maximum number of unique cases (compare with dim(unique(data[subset,]))[1])}
 
+\item{min_na_row}{(optional) minimum number of missing values in each row}
+
 \item{max_na_row}{(optional) maximum number of missing values in each row}
+
+\item{min_na_all}{(optional) minimum number of missing values overall}
 
 \item{max_na_all}{(optional) maximum number of missing values overall}
 

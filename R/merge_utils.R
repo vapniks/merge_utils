@@ -548,7 +548,7 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
     if(is.symbol(subvar))
         varname <- deparse(subvar)
     else if(is.character(subvar) & length(subvar)==1)
-        varname <- var
+        varname <- subvar
     else
         varname <- "unknown"
     if(!missing(data))
@@ -716,10 +716,10 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
 ##' @param max_cc (optional) maximum number of complete cases (compare with sum(complete.cases(data[subset,])))
 ##' @param min_uniq (optional) minimum number of unique cases (compare with dim(unique(data[subset,]))[1]). Default value is 1.
 ##' @param max_uniq (optional) maximum number of unique cases (compare with dim(unique(data[subset,]))[1])
-##' @param max_na_row (optional) maximum number of missing values in each row
 ##' @param min_na_row (optional) minimum number of missing values in each row
-##' @param max_na_all (optional) maximum number of missing values overall
+##' @param max_na_row (optional) maximum number of missing values in each row
 ##' @param min_na_all (optional) minimum number of missing values overall
+##' @param max_na_all (optional) maximum number of missing values overall
 ##' @param silent (optional) if TRUE then don't omit warning messages informing of error type (FALSE by default)
 ##' @param stoponfail (optional) if TRUE then throw an error on the first check that fails (FALSE by default)
 ##' @param vars (optional) either a numeric or character vector, or a regexp matching names of variables to check
@@ -731,7 +731,7 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
 ##' @author Ben Veal
 ##' @export 
 checkDF <- function(data,subset,min_rows,max_rows,min_cols,max_cols,min_cc,max_cc,min_uniq,max_uniq,
-                    max_na_row,max_na_all,silent=FALSE,stoponfail=FALSE,vars=NULL,checks=NULL)
+                    min_na_row,max_na_row,min_na_all,max_na_all,silent=FALSE,stoponfail=FALSE,vars=NULL,checks=NULL)
 {
     nrows1 <- dim(data)[1]
     stopifnot(nrows1>0)
