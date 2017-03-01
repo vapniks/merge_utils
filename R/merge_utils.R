@@ -720,6 +720,7 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
 ##' @param max_na_row (optional) maximum number of missing values in each row
 ##' @param min_na_all (optional) minimum number of missing values overall
 ##' @param max_na_all (optional) maximum number of missing values overall
+##' @param showbadrows (optional) if a positive integer N then print the first N non-matching rows (only for tests on rows. Default: N = 100).
 ##' @param silent (optional) if TRUE then don't omit warning messages informing of error type (FALSE by default)
 ##' @param stoponfail (optional) if TRUE then throw an error on the first check that fails (FALSE by default)
 ##' @param vars (optional) either a numeric or character vector, or a regexp matching names of variables to check
@@ -731,7 +732,8 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
 ##' @author Ben Veal
 ##' @export 
 checkDF <- function(data,subset,min_rows,max_rows,min_cols,max_cols,min_cc,max_cc,min_uniq,max_uniq,
-                    min_na_row,max_na_row,min_na_all,max_na_all,silent=FALSE,stoponfail=FALSE,vars=NULL,checks=NULL)
+                    min_na_row,max_na_row,min_na_all,max_na_all,
+                    showbadrows=100,silent=FALSE,stoponfail=FALSE,vars=NULL,checks=NULL)
 {
     nrows1 <- dim(data)[1]
     stopifnot(nrows1>0)
@@ -789,7 +791,11 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cols,max_cols,min_cc,max_c
         if(length(whichrows) > 0) {
             badrows <- c(badrows,list(max_na_row=whichrows))
             report("Too many missing values in rows")
-            print(whichrows)
+            if(is.positiveint(showbadrows)) {
+                print(whichrows[1:showbadrows])
+            } else {
+                print(whichrows)
+            }
         }
     }
     if((!missing(min_na_row)) && is.numeric(min_na_row)) {
