@@ -709,7 +709,9 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
 ##' @param data dataframe to be checked
 ##' @param subset (optional) logical expression indicating subset of 'data' to check (see \code{\link{subset}})
 ##' @param min_rows (optional) minimum number of rows (compare with dim(data[subset,])[1]). 
-##' @param max_rows (optional) maximum number of rows (compare with dim(data[subset,])[1])
+##' @param max_rows (optional) maximum number of rows (compare with dim(data[subset,])[1]).
+##' @param min_cols (optional) minimum number of columns (compare with dim(data[subset,])[2]). 
+##' @param max_cols (optional) maximum number of columns (compare with dim(data[subset,])[2]).
 ##' @param min_cc (optional) minimum number of complete cases (compare with sum(complete.cases(data[subset,])))
 ##' @param max_cc (optional) maximum number of complete cases (compare with sum(complete.cases(data[subset,])))
 ##' @param min_uniq (optional) minimum number of unique cases (compare with dim(unique(data[subset,]))[1]). Default value is 1.
@@ -726,7 +728,7 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
 ##' @seealso \code{\link{checkVar}}
 ##' @author Ben Veal
 ##' @export 
-checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uniq,
+checkDF <- function(data,subset,min_rows,max_rows,min_cols,max_cols,min_cc,max_cc,min_uniq,max_uniq,
                     max_na_row,max_na_all,silent=FALSE,stoponfail=FALSE,vars=NULL,checks=NULL)
 {
     nrows1 <- dim(data)[1]
@@ -754,7 +756,7 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
                                  ok <- FALSE})
     mintest <- gtools::defmacro(val,tot,min,str,expr={if(val < min | (min <= 1 & val/tot < min)) report(paste("Not enough",str))})
     maxtest <- gtools::defmacro(val,tot,max,str,expr={if(val/tot > max | (max >= 1 & val > max)) report(paste("Too many",str))})
-    # do dataframe wide checks
+    ## do dataframe wide checks
     if(!missing(min_rows))
         mintest(nrows2,nrows1,min_rows,subsetmsg)
     # if only the 'subset' & 'data' args are supplied then just check that all rows satisfy the 'subset' expression
@@ -763,6 +765,10 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cc,max_cc,min_uniq,max_uni
         mintest(nrows2,nrows1,nrows1,subsetmsg)
     if(!missing(max_rows))
         maxtest(nrows2,nrows1,max_rows,subsetmsg)
+    if(!missing(min_cols))
+        mintest(ncols2,1,min_cols,"columns")
+    if(!missing(max_cols))
+        maxtest(ncols2,1,max_cols,"columns")
     if(!missing(min_cc))
         mintest(sum(complete.cases(data)),nrows2,min_cc,"complete cases")
     if(!missing(max_cc))
