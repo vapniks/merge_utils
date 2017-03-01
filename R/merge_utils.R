@@ -541,7 +541,10 @@ matchByDistance <- function(distMat,onto=TRUE)
 checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,vals,valstype="all",charmatch,nocharmatch,
                      min_uniq,max_uniq,max_na,pred,showbadvals=100,silent=FALSE,stoponfail=FALSE)
 {
-    subvar <- substitute(var)
+    if(is.expression(var))
+        subvar <- substitute(var)
+    else
+        subvar <- "unknown"
     if(is.symbol(subvar))
         varname <- deparse(subvar)
     else if(is.character(subvar) & length(subvar)==1)
@@ -552,6 +555,7 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
         var <- data[[varname]]
     isnumeric <- mode(var) == "numeric"
     len <- length(var)
+    stopifnot(len > 0)
     ok <- TRUE
     badidxs <- list()
     ## Useful functions and macros to save some typing
