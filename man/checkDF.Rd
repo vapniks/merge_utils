@@ -4,9 +4,9 @@
 \alias{checkDF}
 \title{Perform sanity checks on a dataframe.}
 \usage{
-checkDF(data, subset, min_rows, max_rows, min_cc, max_cc, min_uniq, max_uniq,
-  max_na_row, max_na_all, silent = FALSE, stoponfail = FALSE, vars = NULL,
-  checks = NULL)
+checkDF(data, subset, min_rows, max_rows, min_cols, max_cols, min_cc, max_cc,
+  min_uniq, max_uniq, max_na_row, max_na_all, silent = FALSE,
+  stoponfail = FALSE, vars = NULL, checks = NULL)
 }
 \arguments{
 \item{data}{dataframe to be checked}
@@ -15,7 +15,11 @@ checkDF(data, subset, min_rows, max_rows, min_cc, max_cc, min_uniq, max_uniq,
 
 \item{min_rows}{(optional) minimum number of rows (compare with dim(data[subset,])[1]).}
 
-\item{max_rows}{(optional) maximum number of rows (compare with dim(data[subset,])[1])}
+\item{max_rows}{(optional) maximum number of rows (compare with dim(data[subset,])[1]).}
+
+\item{min_cols}{(optional) minimum number of columns (compare with dim(data[subset,])[2]).}
+
+\item{max_cols}{(optional) maximum number of columns (compare with dim(data[subset,])[2]).}
 
 \item{min_cc}{(optional) minimum number of complete cases (compare with sum(complete.cases(data[subset,])))}
 

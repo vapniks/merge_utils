@@ -717,7 +717,9 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
 ##' @param min_uniq (optional) minimum number of unique cases (compare with dim(unique(data[subset,]))[1]). Default value is 1.
 ##' @param max_uniq (optional) maximum number of unique cases (compare with dim(unique(data[subset,]))[1])
 ##' @param max_na_row (optional) maximum number of missing values in each row
+##' @param min_na_row (optional) minimum number of missing values in each row
 ##' @param max_na_all (optional) maximum number of missing values overall
+##' @param min_na_all (optional) minimum number of missing values overall
 ##' @param silent (optional) if TRUE then don't omit warning messages informing of error type (FALSE by default)
 ##' @param stoponfail (optional) if TRUE then throw an error on the first check that fails (FALSE by default)
 ##' @param vars (optional) either a numeric or character vector, or a regexp matching names of variables to check
@@ -749,6 +751,7 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cols,max_cols,min_cc,max_c
     ok <- TRUE
     badrows <- list()
     ## useful functions and macros to save some typing
+    is.positiveint <- function(x) (abs(x - round(x)) < .Machine$double.eps^0.5 & x > 0)
     badvar <- function(x) {!as.logical(x[[1]])} # returns TRUE if x is a return value from checkVar that indicates the check failed
     report <- gtools::defmacro(str,expr={msg <- paste(str,"for",framename,"dataframe");
                                  if(stoponfail) stop(msg);
@@ -778,15 +781,31 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cols,max_cols,min_cc,max_c
     if(!missing(max_uniq))
         maxtest(dim(unique(data))[1],nrows2,max_uniq,"unique cases")
     if((!missing(max_na_row)) && is.numeric(max_na_row)) {
-        whichrows <- which(apply(data,1,function(x) {sum(is.na(x)) > max_na_row}))
+        if(max_na_row > 1)
+            whichrows <- which(apply(data,1,function(x) {sum(is.na(x)) > max_na_row}))
+        else
+            whichrows <- which(apply(data,1,function(x) {sum(is.na(x))/ncols2 > max_na_row}))
         if(length(whichrows) > 0) {
             badrows <- c(badrows,list(max_na_row=whichrows))
             report("Too many missing values in rows")
             print(whichrows)
         }
     }
+    if((!missing(min_na_row)) && is.numeric(min_na_row)) {
+        if(min_na_row > 1)
+            whichrows <- which(apply(data,1,function(x) {sum(is.na(x)) < min_na_row}))
+        else
+            whichrows <- which(apply(data,1,function(x) {sum(is.na(x))/ncols2 < min_na_row}))
+        if(length(whichrows) > 0) {
+            badrows <- c(badrows,list(min_na_row=whichrows))
+            report("Too few missing values in rows")
+            print(whichrows)
+        }
+    }
     if(!missing(max_na_all))
         maxtest(sum(is.na(data)),nrows2*ncols2,max_na_all,"missing values")
+    if(!missing(min_na_all))
+        mintest(sum(is.na(data)),nrows2*ncols2,min_na_all,"missing values")
     # do variable specific checks
     varnames <- names(data)
     if(length(vars) > 0 & length(checks) > 0) {
