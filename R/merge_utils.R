@@ -782,9 +782,10 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cols,max_cols,min_cc,max_c
         maxtest(dim(unique(data))[1],nrows2,max_uniq,"unique cases")
     if((!missing(max_na_row)) && is.numeric(max_na_row)) {
         if(max_na_row > 1)
-            whichrows <- which(apply(data,1,function(x) {sum(is.na(x)) > max_na_row}))
+            max1 <- max_na_row
         else
-            whichrows <- which(apply(data,1,function(x) {sum(is.na(x))/ncols2 > max_na_row}))
+            max1 <- ncols2*max_na_row
+        whichrows <- which(apply(data,1,function(x) {sum(is.na(x)) > max1}))
         if(length(whichrows) > 0) {
             badrows <- c(badrows,list(max_na_row=whichrows))
             report("Too many missing values in rows")
@@ -793,9 +794,10 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cols,max_cols,min_cc,max_c
     }
     if((!missing(min_na_row)) && is.numeric(min_na_row)) {
         if(min_na_row > 1)
-            whichrows <- which(apply(data,1,function(x) {sum(is.na(x)) < min_na_row}))
+            min1 <- min_na_row
         else
-            whichrows <- which(apply(data,1,function(x) {sum(is.na(x))/ncols2 < min_na_row}))
+            min1 <- ncols2*min_na_row
+        whichrows <- which(apply(data,1,function(x) {sum(is.na(x)) < min1}))
         if(length(whichrows) > 0) {
             badrows <- c(badrows,list(min_na_row=whichrows))
             report("Too few missing values in rows")
