@@ -6,7 +6,8 @@
 \usage{
 checkDF(data, subset, min_rows, max_rows, min_cols, max_cols, min_cc, max_cc,
   min_uniq, max_uniq, min_na_row, max_na_row, min_na_all, max_na_all,
-  silent = FALSE, stoponfail = FALSE, vars = NULL, checks = NULL)
+  showbadrows = 100, silent = FALSE, stoponfail = FALSE, vars = NULL,
+  checks = NULL)
 }
 \arguments{
 \item{data}{dataframe to be checked}
@@ -36,6 +37,8 @@ checkDF(data, subset, min_rows, max_rows, min_cols, max_cols, min_cc, max_cc,
 \item{min_na_all}{(optional) minimum number of missing values overall}
 
 \item{max_na_all}{(optional) maximum number of missing values overall}
+
+\item{showbadrows}{(optional) if a positive integer N then print the first N non-matching rows (only for tests on rows. Default: N = 100).}
 
 \item{silent}{(optional) if TRUE then don't omit warning messages informing of error type (FALSE by default)}
 

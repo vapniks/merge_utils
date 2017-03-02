@@ -531,11 +531,12 @@ matchByDistance <- function(distMat,onto=TRUE)
 ##' @param stoponfail (optional) if TRUE then throw an error on the first check that fails (FALSE by default)
 ##' @return A list whose first element is TRUE if all checks passed, FALSE otherwise, and whose subsequent elements are vectors of indices of non-matching values for tests on individual values.
 ##' @seealso \code{\link{checkDF}}, \code{\link{CurryL}}, \code{\link{apply}}
-##' @examples # create a function for checking variables in "ChickWeight" dataframe
+##' @examples ## create a function for checking variables in "ChickWeight" dataframe
 ##' checkalldata <- functional::CurryL(checkVar,data=ChickWeight)
-##' checkalldata(weight,vartype="numeric")
-##' # check each and every variable of dataframe
-##' apply(ChickWeight,2,function(x){checkVar(x,vartype="numeric")})
+##' ## check one variable
+##' checkalldata("weight",vartype="double")
+##' ## check every variable of the dataframe
+##' sapply(names(ChickWeight),function(x) {checkalldata(x,vartype="double")})
 ##' @author Ben Veal
 ##' @export
 checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,vals,valstype="all",charmatch,nocharmatch,
@@ -543,14 +544,14 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
 {
     if(is.expression(var))
         subvar <- substitute(var)
+    else if(is.character(var) & length(var)==1)
+        subvar <- var
     else
         subvar <- "unknown"
     if(is.symbol(subvar))
         varname <- deparse(subvar)
-    else if(is.character(subvar) & length(subvar)==1)
+    else 
         varname <- subvar
-    else
-        varname <- "unknown"
     if(!missing(data))
         var <- data[[varname]]
     isnumeric <- mode(var) == "numeric"
@@ -835,6 +836,85 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cols,max_cols,min_cc,max_c
     # finished all checks
     if(ok & !silent) print(paste("All checks passed for",framename,"dataframe"))
     return(c(ok,badrows))
+}
+
+
+##' @title Perform multiple sets of predefined tests on a dataframe
+##' @description This function allows you to pass in lists of arguments defining tests on different variables
+##' of a dataframe. Each list should contain "vars" and "checks" named arguments, along with other named arguments
+##' to be passed to the \code{\link{checkDF}} function. You can also pass single named arguments for \code{\link{checkDF}}
+##' which will be checked separately at the end.
+##' @details A test specification takes the form of a list of named arguments to \code{\link{checkDF}}.
+##' Each list containing "vars" and "checks" named arguments will invoke a separate call to the \code{\link{checkDF}} 
+##' function, and the matching columns of df will be checked. Any other named arguments will be aggregated
+##' together and used in a single call to \code{\link{checkDF}} after all the variable specific checks have finished.
+##' If the same named argument (apart from "vars" and "checks") appears more than once (either in different lists, or separately)
+##' it will only be used once at the end. This means you can create predefined test specifications and use them together,
+##' without worrying about overlap.
+##' This is useful when you need to check multiple dataframes which may share some data of the same type. In this case you can
+##' predefine tests for the different types of variables, and perhaps also some general tests about the dimensions of the
+##' dataframe, number of missing values etc. Then for each dataframe you can call this function with the appropriate test
+##' specifications.
+##' See the examples section for examples of how to define test specifications.
+##' @param df A dataframe on which to perform the checks.
+##' @param ... Lists of arguments, or individual arguments for \code{\link{checkDF}}
+##' @return
+##' @examples ## Test specifcation that checks that variables with names matching "postcode" should contain postcodes, and
+##' ## have at most 30% missing values:
+##' postcode.check <- list(vars="postcode",checks=list(vartype="character",
+##' ## charmatch="[a-zA-Z]{1,2}[0-9][0-9A-Za-z]{0,1} ?[0-9]?[A-Za-z]{2}",max_na=0.3))
+##' ## General test specification to check that the dataframe dimensions are reasonable,
+##' ## and there arent too many missing values
+##' sanity.check <- list(min_rows=100,max_rows=10000000,min_cols=2,max_cols=100,max_na_row=0.5)
+##' ## Test specifications for longitude and latitude variables (bounds are for UK):
+##' long.check <- list(vars="longitude",checks=list(vartype="double",max_na=0.1,min=-9,max=2))
+##' lat.check <- list(vars="latitude",checks=list(vartype="double",max_na=0.1,min=49,max=100))
+##' ## To check a dataframe using these specifications:
+##' ## doDFchecks(df1,postcode.check,long.check,lat.check,sanity.check)
+##' ## You can override some of the named arguments in sanity.check:
+##' ## doDFchecks(df1,postcode.check,long.check,lat.check,sanity.check,min_rows=50000,max_rows=100000)
+##' @author Ben Veal
+##' @export 
+doDFchecks <- function(df,...) {
+    args <- list(...)
+    otherargs <- list()
+    dfname <- deparse(substitute(df))
+    print(paste0("Checking ",dfname,": "))
+    ## these named arguments will always be checked together, but separately from other arguments which apply
+    ## to whole dataframe
+    varchknames <- c("vars","checks")
+    ## loop over the arguments given to the function
+    for(i in 1:length(args)) {
+        arg <- args[[i]]
+        name <- names(args)[i]
+        ## if the arg is a list, then extract elements with names in varchknames and check now
+        ## other elements will be added to otherargs and checked at the end
+        if(is.list(arg)) {
+            do.call(checkDF,c(list(data=df),arg[varchknames]))
+            argnames <- Filter(function(x) !(x %in% varchknames), names(arg))
+            ## loop over the named elements that are not in varchknames
+            for(name in argnames) {
+                ## if this element is already present in otherargs then overwrite its value
+                ## otherwise add it to otherargs
+                if(name %in% names(otherargs)) {
+                    otherargs[name] <- arg[[name]]
+                } else {
+                    otherargs <- c(arg[name],otherargs)
+                }
+            }
+            ## for non-list arguments, check their names, and either overwrite or add to otherargs depending if
+            ## its already in there or not
+        } else if(name %in% names(otherargs)) {
+            otherargs[name] <- arg
+        } else {
+            otherargs <- c(arg,otherargs)
+            names(otherargs)[1] <- name
+        }
+    }
+    ## finally check all the otherargs (if any)
+    if(length(otherargs) > 0) {
+        do.call(checkDF,c(list(data=df),otherargs))
+    }
 }
 
 ##' Given a dataframe df and a grouping variable idcol, this function finds which rows are the same across

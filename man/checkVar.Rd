@@ -71,11 +71,12 @@ the CurryL function in the functional library, e.g: checkalldata <- CurryL(check
 \code{\link{apply}} or \code{\link{checkDF}} functions.
 }
 \examples{
-# create a function for checking variables in "ChickWeight" dataframe
+## create a function for checking variables in "ChickWeight" dataframe
 checkalldata <- functional::CurryL(checkVar,data=ChickWeight)
-checkalldata(weight,vartype="numeric")
-# check each and every variable of dataframe
-apply(ChickWeight,2,function(x){checkVar(x,vartype="numeric")})
+## check one variable
+checkalldata("weight",vartype="double")
+## check every variable of the dataframe
+sapply(names(ChickWeight),function(x) {checkalldata(x,vartype="double")})
 }
 \seealso{
 \code{\link{checkDF}}, \code{\link{CurryL}}, \code{\link{apply}}
