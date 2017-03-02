@@ -758,8 +758,12 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cols,max_cols,min_cc,max_c
                                  if(stoponfail) stop(msg);
                                  if(!silent) print(msg);
                                  ok <- FALSE})
-    mintest <- gtools::defmacro(val,tot,min,str,expr={if(val < min | (min <= 1 & val/tot < min)) report(paste("Not enough",str))})
-    maxtest <- gtools::defmacro(val,tot,max,str,expr={if(val/tot > max | (max >= 1 & val > max)) report(paste("Too many",str))})
+    mintest <- gtools::defmacro(val,tot,min,str,expr={if(val < min | (min <= 1 & val/tot < min))
+                                                          report(paste("Not enough",str,": only got",val,"but needed at least",
+                                                                       ifelse((min>1),min,min*tot)))})
+    maxtest <- gtools::defmacro(val,tot,max,str,expr={if(val/tot > max | (max >= 1 & val > max))
+                                                          report(paste("Too many",str,": got",val,"but needed at most",
+                                                                       ifelse((max>=1),max,max*tot)))})
     ## do dataframe wide checks
     if(!missing(min_rows))
         mintest(nrows2,nrows1,min_rows,subsetmsg)
