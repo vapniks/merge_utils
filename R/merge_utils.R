@@ -879,9 +879,12 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cols,max_cols,min_cc,max_c
 ##' @export 
 doDFchecks <- function(df,...) {
     args <- list(...)
+    checksnames <- paste(deparse(substitute(list(...))),collapse="")
+    checksnames <- substr(checksnames,6,nchar(checksnames)-1)
+    checksnames <- strsplit(checksnames,",")[[1]]
     otherargs <- list()
     dfname <- deparse(substitute(df))
-    print(paste0("Checking ",dfname,": "))
+    print(paste0(dfname,": "))
     ## these named arguments will always be checked together, but separately from other arguments which apply
     ## to whole dataframe
     varchknames <- c("vars","checks")
@@ -889,11 +892,17 @@ doDFchecks <- function(df,...) {
     for(i in 1:length(args)) {
         arg <- args[[i]]
         name <- names(args)[i]
+        ## get the name of the current check
+        checkname <- checksnames[i]
         ## If the arg is a list, then extract elements with names in varchknames (if there are any) 
         ## and check now. Other elements will be added to otherargs and checked at the end.
         if(is.list(arg)) {
-            if(all(varchknames %in% names(arg)))
+            if(all(varchknames %in% names(arg))) {
+                ## inform user which check is being done
+                checkname <- gsub("^\\s+|\\s+$","",checkname)
+                print(paste0(checkname,"..."))
                 do.call(checkDF,c(list(data=df),arg[varchknames]))
+                }
             argnames <- Filter(function(x) !(x %in% varchknames), names(arg))
             ## loop over the named elements that are not in varchknames
             for(name in argnames) {
