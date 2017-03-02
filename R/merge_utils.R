@@ -535,8 +535,6 @@ matchByDistance <- function(distMat,onto=TRUE)
 ##' checkalldata <- functional::CurryL(checkVar,data=ChickWeight)
 ##' ## check one variable
 ##' checkalldata("weight",vartype="double")
-##' ## check every variable of the dataframe
-##' sapply(names(ChickWeight),function(x) {checkalldata(x,vartype="double")})
 ##' @author Ben Veal
 ##' @export
 checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,vals,valstype="all",charmatch,nocharmatch,
@@ -887,10 +885,11 @@ doDFchecks <- function(df,...) {
     for(i in 1:length(args)) {
         arg <- args[[i]]
         name <- names(args)[i]
-        ## if the arg is a list, then extract elements with names in varchknames and check now
-        ## other elements will be added to otherargs and checked at the end
+        ## If the arg is a list, then extract elements with names in varchknames (if there are any) 
+        ## and check now. Other elements will be added to otherargs and checked at the end.
         if(is.list(arg)) {
-            do.call(checkDF,c(list(data=df),arg[varchknames]))
+            if(all(varchknames %in% names(arg)))
+                do.call(checkDF,c(list(data=df),arg[varchknames]))
             argnames <- Filter(function(x) !(x %in% varchknames), names(arg))
             ## loop over the named elements that are not in varchknames
             for(name in argnames) {
