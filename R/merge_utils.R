@@ -519,8 +519,8 @@ matchByDistance <- function(distMat,onto=TRUE)
 ##' @param vals (optional), list of all unique non missing values (compared with uniqueNotNA(var))
 ##' @param valstype (optional) used in conjunction with 'vals'. If "all" (default) then 'vals' should contain all the same
 ##' items as uniqueNotNA(var), if "subset"/"superset" then 'vals' should be a subset/superset of uniqueNotNA(var)
-##' @param charmatch (optional) regexp that should match each value. Use only with character variables.
-##' @param nocharmatch (optional) regexp that should not match any value. Use only with character variables.
+##' @param charmatch (optional) regexp that should match each value (apart from missing values). Use only with character variables.
+##' @param nocharmatch (optional) regexp that should not match any value (apart from missing values). Use only with character variables.
 ##' @param min_uniq (optional) minimum number of unique values (compare with length(unique(var)))
 ##' @param max_uniq (optional) maximum number of unique values (compare with length(unique(var)))
 ##' @param max_na (optional) maximum number of missing values (compare with sum(is.na(var)))
@@ -647,7 +647,7 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
     if(!missing(charmatch)) {
         if(class(var)!="character")
             report(paste0("Expected 'character' mode for use with charmatch arg but got '",mode(var),"' mode"))
-        idxs <- which(!grepl(charmatch,var))
+        idxs <- which((!grepl(charmatch,var)) & (!(is.na(var))))
         if(length(idxs) > 0) {
             badidxs <- c(badidxs,list(charmatch=idxs))
             report("Invalid values",idxs)
@@ -657,7 +657,7 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
     if(!missing(nocharmatch)) {
         if(class(var)!="character")
             report(paste0("Expected 'character' mode for use with charmatch arg but got '",mode(var),"' mode"))
-        idxs <- which(grepl(nocharmatch,var))
+        idxs <- which(grepl(nocharmatch,var) & (!(is.na(var))))
         if(length(idxs) > 0) {
             badidxs <- c(badidxs,list(nocharmatch=idxs))
             report("Invalid values",idxs)
@@ -795,7 +795,7 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cols,max_cols,min_cc,max_c
             badrows <- c(badrows,list(max_na_row=whichrows))
             report("Too many missing values in rows")
             if(is.positiveint(showbadrows)) {
-                print(whichrows[1:showbadrows])
+                print(whichrows[1:min(showbadrows,length(whichrows))])
             } else {
                 print(whichrows)
             }
