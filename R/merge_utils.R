@@ -1103,3 +1103,32 @@ dupsBetweenDFs <- function(dfs,by=NULL,matchall=FALSE) {
 numUnique <- function(x,warn=FALSE) {
     length(uniqueNotNA(x,warn))
 }
+
+##' @title Apply function to objects in environment matching pattern
+##' @description Apply a function to all objects in an environment (default is globalenv() - the user workspace)
+##' whose names match the pattern given as the first argument.
+##' @details This function is useful for browsing your workspace objects. It takes the same arguments as \code{\link{ls}}
+##' but in a different order, and with a couple of extra arguments: FUN and inc.null
+##' FUN should take a single object as its only argument, and must be supplied as the 2nd argument.
+##' By default any objects which return NULL when FUN is applied to them will not be included in the output
+##' (e.g. if FUN=names then vectors will skipped from output since they have no names). You can include these
+##' objects in the output by setting inc.null=TRUE
+##' @param pattern A regular expression matching the objects to apply the FUN to.
+##' By default this is set to ".*", i.e. match all objects.
+##' @param FUN A function to apply to each matched object.
+##' @param name An environment to search for objects (see \code{\link{ls}}). Default is globalenv() - the user workspace.
+##' @param all.names If TRUE all object names are returned. If FALSE (default), names beginning with '.' are omitted (see \code{\link{ls}}).
+##' @param sorted If TRUE (default) the object names are sorted alphabetically before passing to FUN (see \code{\link{ls}}).
+##' @param inc.null Whether or not to include NULL values in the output. See details.
+##' @return A named list of objects after applying FUN.
+##' @examples lsapply(names)
+##' lsapply()
+##' @author Ben Veal
+##' @export 
+lsapply <- function(FUN=dim, pattern=".*", name=globalenv(), all.names=FALSE, sorted=TRUE, inc.null=FALSE) {
+    names1 <- ls(name=name,pattern=pattern,all.names=all.names,sorted=sorted)
+    vals <- lapply(names1, function(x) FUN(get(x)))
+    names(vals) <- names1
+    if(inc.null) vals
+    else vals[which(!sapply(vals,is.null))]
+}

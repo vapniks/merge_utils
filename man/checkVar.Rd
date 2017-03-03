@@ -32,9 +32,9 @@ checkVar(var, data, vartype, varclass, varmode, min_len, max_len, min, max,
 \item{valstype}{(optional) used in conjunction with 'vals'. If "all" (default) then 'vals' should contain all the same
 items as uniqueNotNA(var), if "subset"/"superset" then 'vals' should be a subset/superset of uniqueNotNA(var)}
 
-\item{charmatch}{(optional) regexp that should match each value. Use only with character variables.}
+\item{charmatch}{(optional) regexp that should match each value (apart from missing values). Use only with character variables.}
 
-\item{nocharmatch}{(optional) regexp that should not match any value. Use only with character variables.}
+\item{nocharmatch}{(optional) regexp that should not match any value (apart from missing values). Use only with character variables.}
 
 \item{min_uniq}{(optional) minimum number of unique values (compare with length(unique(var)))}
 
