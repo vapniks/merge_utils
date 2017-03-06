@@ -2,16 +2,19 @@
 % Please edit documentation in R/merge_utils.R
 \name{lsapply}
 \alias{lsapply}
-\title{Apply function to objects in environment matching pattern}
+\title{Apply function to objects in environment matching pattern and filter}
 \usage{
-lsapply(FUN = dim, pattern = ".*", name = globalenv(),
+lsapply(FUN = dim, pattern = ".*", filter, name = globalenv(),
   all.names = FALSE, sorted = TRUE, inc.null = FALSE)
 }
 \arguments{
-\item{FUN}{A function to apply to each matched object.}
+\item{FUN}{A function to apply to each matched object (default=dim)}
 
 \item{pattern}{A regular expression matching the objects to apply the FUN to.
-By default this is set to ".*", i.e. match all objects.}
+By default this is set to ".*", i.e. match all objects. If this argument is missing then the filter argument can take its place.}
+
+\item{filter}{An expression for filtering the objects before apply FUN to them. Within the expression the object under
+scrutiny can be referenced with "x", e.g: is.data.frame(x) && nrow(x) > 300}
 
 \item{name}{An environment to search for objects (see \code{\link{ls}}). Default is globalenv() - the user workspace.}
 
@@ -25,20 +28,41 @@ By default this is set to ".*", i.e. match all objects.}
 A named list of objects after applying FUN.
 }
 \description{
-Apply a function to all objects in an environment (default is globalenv() - the user workspace)
-whose names match the pattern given as the first argument.
+Apply a function to objects in an environment (default is globalenv() - the user workspace)
+whose names match the regexp given as the second argument, and whose values return true when the filter
+argument is applied.
 }
 \details{
 This function is useful for browsing your workspace objects. It takes the same arguments as \code{\link{ls}}
-but in a different order, and with a couple of extra arguments: FUN and inc.null
-FUN should take a single object as its only argument, and must be supplied as the 2nd argument.
-By default any objects which return NULL when FUN is applied to them will not be included in the output
-(e.g. if FUN=names then vectors will skipped from output since they have no names). You can include these
-objects in the output by setting inc.null=TRUE
+but in a different order, and with a few other arguments: FUN, filter and inc.null
+The objects are first filtered using the pattern and filter arguments, and then FUN is applied to them.
+FUN should take a single object as its only argument. By default any objects which return NULL when FUN is applied to
+them will not be included in the output (e.g. if FUN=names then vectors will be skipped from output since they have no names).
+You can include these NULL objects in the output by setting inc.null=TRUE
+
+The objects are first filtered by name using the pattern argument (a regular expression matching the object names),
+and then using the filter argument if supplied. The filter can be any expression involving "x" (a variable containing
+the current object being tested) which returns TRUE or FALSE.
+The function can be called using one of the following formats:
+
+lsapply(FUN,pattern,filter[,named args])
+lsapply(FUN,filter[,named args])
+lsapply(pattern,filter[,named args])
+lsapply(pattern[,named args])
+lsapply(filter,pattern[,named args])
+lsapply(filter[,named args])
+
+(the named args are optional)
 }
 \examples{
-lsapply(names)
 lsapply()
+lsapply(names)
+lsapply("data")
+lsapply(names,"data")
+lsapply(nrow(x) > 100)
+lsapply(names,nrow(x) > 100)
+lsapply("data",nrow(x) > 100)
+lsapply(names,"data",nrow(x) > 100)
 }
 \author{
 Ben Veal

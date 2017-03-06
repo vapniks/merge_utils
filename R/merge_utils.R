@@ -1104,31 +1104,105 @@ numUnique <- function(x,warn=FALSE) {
     length(uniqueNotNA(x,warn))
 }
 
-##' @title Apply function to objects in environment matching pattern
-##' @description Apply a function to all objects in an environment (default is globalenv() - the user workspace)
-##' whose names match the pattern given as the first argument.
+##' @title Apply function to objects in environment matching pattern and filter
+##' @description Apply a function to objects in an environment (default is globalenv() - the user workspace)
+##' whose names match the regexp given as the second argument, and whose values return true when the filter
+##' argument is applied.
 ##' @details This function is useful for browsing your workspace objects. It takes the same arguments as \code{\link{ls}}
-##' but in a different order, and with a couple of extra arguments: FUN and inc.null
-##' FUN should take a single object as its only argument, and must be supplied as the 2nd argument.
-##' By default any objects which return NULL when FUN is applied to them will not be included in the output
-##' (e.g. if FUN=names then vectors will skipped from output since they have no names). You can include these
-##' objects in the output by setting inc.null=TRUE
+##' but in a different order, and with a few other arguments: FUN, filter and inc.null
+##' The objects are first filtered using the pattern and filter arguments, and then FUN is applied to them.
+##' FUN should take a single object as its only argument. By default any objects which return NULL when FUN is applied to
+##' them will not be included in the output (e.g. if FUN=names then vectors will be skipped from output since they have no names).
+##' You can include these NULL objects in the output by setting inc.null=TRUE
+##'
+##' The objects are first filtered by name using the pattern argument (a regular expression matching the object names),
+##' and then using the filter argument if supplied. The filter can be any expression involving "x" (a variable containing
+##' the current object being tested) which returns TRUE or FALSE.
+##' The function can be called using one of the following formats:
+##' 
+##' lsapply(FUN,pattern,filter[,named args])
+##' lsapply(FUN,filter[,named args])
+##' lsapply(pattern,filter[,named args])
+##' lsapply(pattern[,named args])
+##' lsapply(filter,pattern[,named args])
+##' lsapply(filter[,named args])
+##'
+##' (the named args are optional)
+##' 
 ##' @param pattern A regular expression matching the objects to apply the FUN to.
-##' By default this is set to ".*", i.e. match all objects.
-##' @param FUN A function to apply to each matched object.
+##' By default this is set to ".*", i.e. match all objects. If this argument is missing then the filter argument can take its place.
+##' @param filter An expression for filtering the objects before apply FUN to them. Within the expression the object under
+##' scrutiny can be referenced with "x", e.g: is.data.frame(x) && nrow(x) > 300
+##' @param FUN A function to apply to each matched object (default=dim)
 ##' @param name An environment to search for objects (see \code{\link{ls}}). Default is globalenv() - the user workspace.
 ##' @param all.names If TRUE all object names are returned. If FALSE (default), names beginning with '.' are omitted (see \code{\link{ls}}).
 ##' @param sorted If TRUE (default) the object names are sorted alphabetically before passing to FUN (see \code{\link{ls}}).
 ##' @param inc.null Whether or not to include NULL values in the output. See details.
 ##' @return A named list of objects after applying FUN.
-##' @examples lsapply(names)
+##' @examples 
 ##' lsapply()
+##' lsapply(names)
+##' lsapply("data")
+##' lsapply(names,"data")
+##' lsapply(nrow(x) > 100)
+##' lsapply(names,nrow(x) > 100)
+##' lsapply("data",nrow(x) > 100)
+##' lsapply(names,"data",nrow(x) > 100)
 ##' @author Ben Veal
 ##' @export 
-lsapply <- function(FUN=dim, pattern=".*", name=globalenv(), all.names=FALSE, sorted=TRUE, inc.null=FALSE) {
+lsapply <- function(FUN=dim, pattern=".*", filter, name=globalenv(), all.names=FALSE, sorted=TRUE, inc.null=FALSE) {
+    ## check types of 1st and 2nd args for non-standard use cases
+    arg1 <- substitute(FUN)
+    arg2 <- substitute(pattern)
+    ## if 1st arg is a function there could still be further unnamed args
+    arg1isFunction <- is.name(arg1) && is.function(eval(arg1))
+    ## if 1st arg is a pattern there could still be further unnamed args
+    arg1isPattern <-  is.character(arg1)
+    arg2isPattern <- is.character(arg2)
+    ## if 1st or 2nd arg is a filter then there should be no 3rd unnamed arg
+    arg1isFilter <- is.call(arg1) && missing(filter)
+    arg2isFilter <- is.call(arg2) && missing(filter)
+    ## parse the arguments for non-standard use cases
+    if(arg1isFilter) { ## 1st arg is a filter, e.g: lsapply(nrow(x) > 100)
+        filter <- arg1
+        FUN <- dim
+    } else if(arg1isPattern) { ## 1st arg is a pattern, e.g: lsapply("data"...)
+        if(arg2isFilter) { ## 2nd arg is a filter, e.g: lsapply("data", nrow(x) > 100...)
+            filter <- arg2
+        }
+        pattern <- FUN
+        FUN <- dim
+    } else if(arg1isFunction) { ## 1st arg is a function, e.g: lsapply(dim,...)
+        if(arg2isFilter) { ## 2nd arg is a filter, e.g: lsapply(dim, nrow(x) > 100)
+            filter <- arg2
+            pattern <- ".*"
+        } else if(arg2isPattern) {
+            filter <- substitute(filter)
+        } else {
+            stop(paste("Invalid 2nd arg:",deparse(arg2)))
+        }
+    } else {
+        stop(paste("Invalid 1st arg:",deparse(arg1)))
+    }
+    ## get names of matching objects in the workspace
     names1 <- ls(name=name,pattern=pattern,all.names=all.names,sorted=sorted)
-    vals <- lapply(names1, function(x) FUN(get(x)))
-    names(vals) <- names1
+    ## filter the objects using the filter arg
+    filterfun <- function(arg) {
+        eval(filter,envir=list(x=get(arg)))
+    }
+    if(missing(filter)) {
+        whichkeep <- rep(TRUE,length(names1))
+    } else {
+        whichkeep <- sapply(names1,filterfun)
+    }
+    whichkeep[which(sapply(whichkeep,function(y) {length(y)==0 || is.null(y)}))] <- FALSE
+    whichkeep <- unlist(whichkeep)
+    stopifnot(is.logical(whichkeep))
+    ## apply FUN to the filtered objects
+    vals <- lapply(names1[whichkeep], function(x) FUN(get(x)))
+    ## name them
+    names(vals) <- names1[whichkeep]
+    ## return the results, removing NULL values if necessary
     if(inc.null) vals
     else vals[which(!sapply(vals,is.null))]
 }
