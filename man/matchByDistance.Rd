@@ -32,3 +32,5 @@ regardless of whether or not that column is matched by another row.
 \author{
 Ben Veal
 }
+\keyword{misc}
+\keyword{utilities}

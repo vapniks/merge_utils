@@ -46,3 +46,4 @@ To do string matching instead of regular expression matching use fixed=TRUE
 \author{
 Ben Veal
 }
+\keyword{manip}

@@ -35,3 +35,5 @@ or numeric vector means use the columns indicated by that vector.
 \author{
 Ben Veal
 }
+\keyword{misc}
+\keyword{utilities}

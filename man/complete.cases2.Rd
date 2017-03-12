@@ -31,3 +31,5 @@ transformation (though 'lag' works), and I can't see how to easily fix this.
 \author{
 Ben Veal
 }
+\keyword{misc}
+\keyword{utilities}

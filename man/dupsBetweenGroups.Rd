@@ -32,3 +32,5 @@ This function uses code by Winston Chang pinched from here:
 \author{
 Ben Veal
 }
+\keyword{misc}
+\keyword{utilities}

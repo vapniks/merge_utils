@@ -514,7 +514,7 @@ matchByDistance <- function(distMat,onto=TRUE)
 ##' @description Perform sanity checks on a single variable.
 ##' @description This function can be used after performing some data munging to check for mistakes.
 ##' @details 
-##' You can check the data type, class, mode, length, max, min, unique, or missing values.
+##' You can check the data type, class, mode, length, max, min, unique, or missing values, and checksum.
 ##' You can also supply your own function to check the variable.
 ##' For the 'min_uniq', 'max_uniq' and 'max_na' variables, you can supply either a whole number indicating
 ##' the number of cases, or a number between 0 & 1 representing a proportion of cases.
@@ -702,8 +702,8 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
 ##' so you don't need to qualify the variable names. If all arguments apart from 'data', 'subset', 'silent' and 'stoponfail'
 ##' are unset/NULL then the function will check if all rows satisfy the subset logical expression (unless this is unset).
 ##' The other arguments can used for checking the number of complete cases (i.e. rows with no missing values), unique cases,
-##' missing values, and variable specific checks (see below).
-##' 
+##' missing values, checksum, and variable specific checks (see below).
+##'
 ##' For arguments with names beginning with 'min_' or 'max_' you can supply either a whole number indicating
 ##' an amount of rows/columns, or a number between 0 & 1 indicating a proportion of rows/columns.
 ##' For 'min_rows' & 'max_rows' proportions are interpreted as proportions of the whole data (before subsetting),

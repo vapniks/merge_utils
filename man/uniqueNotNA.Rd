@@ -20,3 +20,5 @@ Like 'unique' but omits NA's or NaN's, suppresses warnings, and returns result a
 \author{
 Ben Veal
 }
+\keyword{misc}
+\keyword{utilities}

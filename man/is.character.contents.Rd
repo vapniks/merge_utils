@@ -24,3 +24,5 @@ Unlike \code{\link{is.character}} this works with factors.
 \author{
 Ben Veal
 }
+\keyword{misc}
+\keyword{utilities}

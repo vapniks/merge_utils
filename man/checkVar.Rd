@@ -6,7 +6,7 @@
 \usage{
 checkVar(var, data, vartype, varclass, varmode, min_len, max_len, min, max,
   vals, valstype = "all", charmatch, nocharmatch, min_uniq, max_uniq, max_na,
-  pred, showbadvals = 100, silent = FALSE, stoponfail = FALSE)
+  checksum, pred, showbadvals = 100, silent = FALSE, stoponfail = FALSE)
 }
 \arguments{
 \item{var}{the variable to check (or it's name as a string if the data arg is supplied)}
@@ -42,6 +42,8 @@ items as uniqueNotNA(var), if "subset"/"superset" then 'vals' should be a subset
 
 \item{max_na}{(optional) maximum number of missing values (compare with sum(is.na(var)))}
 
+\item{checksum}{(optional) a checksum of the variable as returned by digest(VAR,algo="crc32").}
+
 \item{pred}{(optional) A function which takes a variable as input and returns TRUE/FALSE depending on whether the
 variable is valid or not.}
 
@@ -60,7 +62,7 @@ Perform sanity checks on a single variable.
 This function can be used after performing some data munging to check for mistakes.
 }
 \details{
-You can check the data type, class, mode, length, max, min, unique, or missing values.
+You can check the data type, class, mode, length, max, min, unique, or missing values, and checksum.
 You can also supply your own function to check the variable.
 For the 'min_uniq', 'max_uniq' and 'max_na' variables, you can supply either a whole number indicating
 the number of cases, or a number between 0 & 1 representing a proportion of cases.
@@ -82,3 +84,5 @@ checkalldata("weight",vartype="double")
 \author{
 Ben Veal
 }
+\keyword{misc}
+\keyword{utilities}

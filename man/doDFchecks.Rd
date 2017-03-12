@@ -34,3 +34,5 @@ See the examples section for examples of how to define test specifications.
 \author{
 Ben Veal
 }
+\keyword{misc}
+\keyword{utilities}

@@ -26,3 +26,4 @@ will recode the variable with the codes reversed, and return the result.
 \author{
 Ben Veal
 }
+\keyword{manip}

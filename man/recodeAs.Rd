@@ -31,3 +31,4 @@ Use this function with care.
 \author{
 Ben Veal
 }
+\keyword{manip}

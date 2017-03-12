@@ -31,3 +31,4 @@ value as 'cols1'.
 \author{
 Ben Veal
 }
+\keyword{manip}

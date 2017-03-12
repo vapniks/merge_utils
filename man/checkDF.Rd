@@ -5,7 +5,7 @@
 \title{Perform sanity checks on a dataframe.}
 \usage{
 checkDF(data, subset, min_rows, max_rows, min_cols, max_cols, min_cc, max_cc,
-  min_uniq, max_uniq, min_na_row, max_na_row, min_na_all, max_na_all,
+  min_uniq, max_uniq, min_na_row, max_na_row, min_na_all, max_na_all, checksum,
   showbadrows = 100, silent = FALSE, stoponfail = FALSE, vars = NULL,
   checks = NULL)
 }
@@ -38,6 +38,8 @@ checkDF(data, subset, min_rows, max_rows, min_cols, max_cols, min_cc, max_cc,
 
 \item{max_na_all}{(optional) maximum number of missing values overall}
 
+\item{checksum}{(optional) a checksum of the variable as returned by digest(VAR,algo="crc32").}
+
 \item{showbadrows}{(optional) if a positive integer N then print the first N non-matching rows (only for tests on rows. Default: N = 100).}
 
 \item{silent}{(optional) if TRUE then don't omit warning messages informing of error type (FALSE by default)}
@@ -62,7 +64,7 @@ argument. This expression will be evaluated in the context of the supplied dataf
 so you don't need to qualify the variable names. If all arguments apart from 'data', 'subset', 'silent' and 'stoponfail'
 are unset/NULL then the function will check if all rows satisfy the subset logical expression (unless this is unset).
 The other arguments can used for checking the number of complete cases (i.e. rows with no missing values), unique cases,
-missing values, and variable specific checks (see below).
+missing values, checksum, and variable specific checks (see below).
 
 For arguments with names beginning with 'min_' or 'max_' you can supply either a whole number indicating
 an amount of rows/columns, or a number between 0 & 1 indicating a proportion of rows/columns.
@@ -96,3 +98,5 @@ checkDF(ChickWeight,min_uniq=10)
 \author{
 Ben Veal
 }
+\keyword{misc}
+\keyword{utilities}

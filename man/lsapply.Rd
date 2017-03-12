@@ -67,3 +67,5 @@ lsapply(names,"data",nrow(x) > 100)
 \author{
 Ben Veal
 }
+\keyword{misc}
+\keyword{utilities}

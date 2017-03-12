@@ -28,3 +28,4 @@ for recoding all strings and numbers variables in a dataframe.
 \author{
 Ben Veal
 }
+\keyword{manip}

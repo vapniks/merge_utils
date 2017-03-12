@@ -20,3 +20,5 @@ Return the number of unique elements of x (excluding NA & NaN's)
 \author{
 Ben Veal
 }
+\keyword{misc}
+\keyword{utilities}

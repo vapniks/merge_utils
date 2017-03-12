@@ -30,3 +30,4 @@ The columns will be returned in the same order as the original dataframe argumen
 \author{
 Ben Veal
 }
+\keyword{manip}

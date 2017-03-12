@@ -25,3 +25,5 @@ contents are strings containing only numbers.
 \author{
 Ben Veal
 }
+\keyword{misc}
+\keyword{utilities}
