@@ -739,6 +739,7 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
 ##' @param max_na_row (optional) maximum number of missing values in each row
 ##' @param min_na_all (optional) minimum number of missing values overall
 ##' @param max_na_all (optional) maximum number of missing values overall
+##' @param checksum (optional) a checksum of the variable as returned by digest(VAR,algo="crc32").
 ##' @param showbadrows (optional) if a positive integer N then print the first N non-matching rows (only for tests on rows. Default: N = 100).
 ##' @param silent (optional) if TRUE then don't omit warning messages informing of error type (FALSE by default)
 ##' @param stoponfail (optional) if TRUE then throw an error on the first check that fails (FALSE by default)
@@ -752,7 +753,7 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
 ##' @keywords utilities misc
 ##' @export 
 checkDF <- function(data,subset,min_rows,max_rows,min_cols,max_cols,min_cc,max_cc,min_uniq,max_uniq,
-                    min_na_row,max_na_row,min_na_all,max_na_all,
+                    min_na_row,max_na_row,min_na_all,max_na_all,checksum,
                     showbadrows=100,silent=FALSE,stoponfail=FALSE,vars=NULL,checks=NULL)
 {
     nrows1 <- dim(data)[1]
@@ -838,6 +839,8 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cols,max_cols,min_cc,max_c
         maxtest(sum(is.na(data)),nrows2*ncols2,max_na_all,"missing values")
     if(!missing(min_na_all))
         mintest(sum(is.na(data)),nrows2*ncols2,min_na_all,"missing values")
+    if(!missing(checksum))
+        if(digest(data,algo="crc32")!=checksum) report("Invalid checksum")
     # do variable specific checks
     varnames <- names(data)
     if(length(vars) > 0 & length(checks) > 0) {
