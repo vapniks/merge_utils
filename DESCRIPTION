@@ -15,5 +15,6 @@ Imports:
     gtools,
     plyr,
     car,
-    stringdist
+    stringdist,
+    digest
 RoxygenNote: 6.0.1

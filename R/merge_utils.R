@@ -15,6 +15,7 @@
 ##' @return A logical vector indicating which rows of df have no missing values for the variables passed in '...'
 ##' Note: currently this doesn't work for formulas which specify instruments (i.e. containing a | symbol)
 ##' @author Ben Veal
+##' @keywords utilities misc
 ##' @export
 complete.cases2 <- function(...,df)
 {
@@ -62,6 +63,7 @@ complete.cases2 <- function(...,df)
 ##' @param suffixes (optional) list or vector of suffixes (one for each dataframe) to be appended to clashing column names
 ##' in order to indicate the original dataframe. 
 ##' @return A single dataframe containing the merged data.
+##' @keywords manip
 ##' @author Ben Veal
 ##' @export
 multimerge <- function(data,by=NULL,all=NULL,suffixes=NULL) {
@@ -118,6 +120,7 @@ multimerge <- function(data,by=NULL,all=NULL,suffixes=NULL) {
 ##' @param warn Whether to issue warnings from 'unique' (default is FALSE).
 ##' @return The unique values of 'x' with NA & NaN values removed.
 ##' @author Ben Veal
+##' @keywords utilities misc
 ##' @export 
 uniqueNotNA <- function(x,warn=FALSE)
 {
@@ -154,6 +157,7 @@ uniqueNotNA <- function(x,warn=FALSE)
 ##' @return A single string or a character vector
 ##' @seealso \code{\link{is.character.contents}}, \code{\link{is.numeric.contents}}, \code{\link{is.logical.contents}}
 ##' @author Ben Veal
+##' @keywords utilities misc
 ##' @export
 contents <- function(x)
 {
@@ -174,6 +178,7 @@ contents <- function(x)
 ##' @return TRUE or FALSE
 ##' @seealso \code{\link{contents}}, \code{\link{is.numeric.contents}}, \code{\link{is.logical.contents}}
 ##' @author Ben Veal
+##' @keywords utilities misc
 ##' @export 
 is.character.contents <- function(x)
 {
@@ -188,6 +193,7 @@ is.character.contents <- function(x)
 ##' @return TRUE or FALSE
 ##' @seealso \code{\link{contents}}, \code{\link{is.character.contents}}, \code{\link{is.logical.contents}}
 ##' @author Ben Veal
+##' @keywords utilities misc
 ##' @export 
 is.numeric.contents <- function(x)
 {
@@ -201,6 +207,7 @@ is.numeric.contents <- function(x)
 ##' @return TRUE or FALSE
 ##' @seealso \code{\link{contents}}, \code{\link{is.character.contents}}, \code{\link{is.numeric.contents}},
 ##' @author Ben Veal
+##' @keywords utilities misc
 ##' @export 
 is.logical.contents <- function(x)
 {
@@ -235,6 +242,7 @@ is.logical.contents <- function(x)
 ##' @param x A factor vector, list or dataframe.
 ##' @return A vector, list or dataframe containing no factors.
 ##' @author Ben Veal
+##' @keywords manip
 ##' @export 
 unfactor <- function(x)
 {
@@ -257,6 +265,7 @@ unfactor <- function(x)
 ##' @seealso \code{\link{recodeAs}}, \code{\link{recodeMatches}}, \code{\link{recodeVar}},
 ##' \code{\link{colwise2}} for recoding multiple dataframe columns simultaneously (in library(plyr)).
 ##' @author Ben Veal
+##' @keywords manip
 ##' @export 
 recodeReverse <- function(var)
 {
@@ -290,6 +299,7 @@ recodeReverse <- function(var)
 ##' @seealso \code{\link{recode}} for recoding numbers (in library(car)), \code{\link{recodeVar}}, \code{\link{recodeAs}},
 ##' \code{\link{colwise2}} for recoding multiple dataframe columns simultaneously (in library(plyr)).
 ##' @author Ben Veal
+##' @keywords manip
 ##' @export
 recodeMatches <- function(x,patterns,targets,default=NULL,keep.na=TRUE,ignore.case=TRUE,ignore.punc=TRUE,...)
 {
@@ -329,6 +339,7 @@ recodeMatches <- function(x,patterns,targets,default=NULL,keep.na=TRUE,ignore.ca
 ##' @seealso \code{\link{recode}} for recoding numbers (in library(car)), \code{\link{recodeVar}}, \code{\link{recodeMatch}},
 ##' \code{\link{colwise2}} for recoding multiple dataframe columns simultaneously (in library(plyr)).
 ##' @author Ben Veal
+##' @keywords manip
 ##' @export
 recodeAs <- function(A,B)
 {
@@ -352,6 +363,7 @@ recodeAs <- function(A,B)
 ##' @param nRecodes specification for recoding numbers (see \code{\link{recode}})
 ##' @return a dataframe (recoded)
 ##' @author Ben Veal
+##' @keywords manip
 ##' @export
 recodeDF <- function(df,sPatterns,sTargets=NA,nRecodes)
 {
@@ -373,6 +385,7 @@ recodeDF <- function(df,sPatterns,sTargets=NA,nRecodes)
 ##' @param cols2 numeric/character vector indicating variables of second dataframe to copy codes from
 ##' @return a dataframe (recoded version of 'df1')
 ##' @author Ben Veal
+##' @keywords manip
 ##' @export 
 recodeDFas <- function(df1,df2,cols1,cols2=cols1)
 {
@@ -399,6 +412,7 @@ recodeDFas <- function(df1,df2,cols1,cols2=cols1)
 ##' @return A function which accepts a dataframe as argument and applies '.fun' to each of the columns specified in '.cols'.
 ##' Further arguments to the function will be passed on to '.fun'.
 ##' @author Ben Veal
+##' @keywords manip
 ##' @export
 colwise2 <- function(.fun,.cols=true,...)
 {
@@ -432,6 +446,7 @@ colwise2 <- function(.fun,.cols=true,...)
 ##' @param onto If TRUE (default) then ensure all strings in B are matched by at least one string in A if possible.
 ##' @return A vector whose i'th entry indicates the element of B that matches the i'th element of A
 ##' @author Ben Veal
+##' @keywords utilities misc
 ##' @export
 matchStrings <- function(A,B,onto=TRUE)
 {
@@ -455,6 +470,7 @@ matchStrings <- function(A,B,onto=TRUE)
 ##' @param onto If TRUE (default) then ensure all columns are matched by at least one row if possible.
 ##' @return A vector whose i'th entry indicates the element in the 2nd set matching the i'th element in the 1st set.
 ##' @author Ben Veal
+##' @keywords utilities misc
 ##' @export 
 matchByDistance <- function(distMat,onto=TRUE)
 {
@@ -524,6 +540,7 @@ matchByDistance <- function(distMat,onto=TRUE)
 ##' @param min_uniq (optional) minimum number of unique values (compare with length(unique(var)))
 ##' @param max_uniq (optional) maximum number of unique values (compare with length(unique(var)))
 ##' @param max_na (optional) maximum number of missing values (compare with sum(is.na(var)))
+##' @param checksum (optional) a checksum of the variable as returned by digest(VAR,algo="crc32").
 ##' @param pred (optional) A function which takes a variable as input and returns TRUE/FALSE depending on whether the
 ##' variable is valid or not.
 ##' @param silent (optional) if TRUE then don't omit warning messages informing of error type (FALSE by default)
@@ -536,9 +553,10 @@ matchByDistance <- function(distMat,onto=TRUE)
 ##' ## check one variable
 ##' checkalldata("weight",vartype="double")
 ##' @author Ben Veal
+##' @keywords utilities misc
 ##' @export
 checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,vals,valstype="all",charmatch,nocharmatch,
-                     min_uniq,max_uniq,max_na,pred,showbadvals=100,silent=FALSE,stoponfail=FALSE)
+                     min_uniq,max_uniq,max_na,checksum,pred,showbadvals=100,silent=FALSE,stoponfail=FALSE)
 {
     if(is.expression(var))
         subvar <- substitute(var)
@@ -665,6 +683,8 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
     }
     if(!missing(max_na))
         maxtest(sum(is.na(var)),len,max_na,"Too many missing values")
+    if(!missing(checksum))
+        if(digest(var,algo="crc32")!=checksum) report("Invalid checksum")
     if(!missing(pred)) {
         if(!pred(var))
             report(paste(deparse(substitute(pred)),"returns false"))
@@ -729,6 +749,7 @@ checkVar <- function(var,data,vartype,varclass,varmode,min_len,max_len,min,max,v
 ##' checkDF(ChickWeight,min_uniq=10)
 ##' @seealso \code{\link{checkVar}}
 ##' @author Ben Veal
+##' @keywords utilities misc
 ##' @export 
 checkDF <- function(data,subset,min_rows,max_rows,min_cols,max_cols,min_cc,max_cc,min_uniq,max_uniq,
                     min_na_row,max_na_row,min_na_all,max_na_all,
@@ -876,6 +897,7 @@ checkDF <- function(data,subset,min_rows,max_rows,min_cols,max_cols,min_cc,max_c
 ##' ## You can override some of the named arguments in sanity.check:
 ##' ## doDFchecks(df1,postcode.check,long.check,lat.check,sanity.check,min_rows=50000,max_rows=100000)
 ##' @author Ben Veal
+##' @keywords utilities misc
 ##' @export 
 doDFchecks <- function(df,...) {
     args <- list(...)
@@ -944,6 +966,7 @@ doDFchecks <- function(df,...) {
 ##' be duplicated across 2 groups
 ##' @return A logical vector indicating which rows of df are duplicated between groups
 ##' @author Ben Veal
+##' @keywords utilities misc
 ##' @export
 dupsBetweenGroups <- function(df,idcol,matchall=FALSE) {
     ## If there is only 1 group then we can return now
@@ -1058,6 +1081,7 @@ dupsBetweenGroups <- function(df,idcol,matchall=FALSE) {
 ##' otherwise a row only need be duplicated across 2 groups
 ##' @return a list of vectors indicating duplicated rows of dataframes
 ##' @author Ben Veal
+##' @keywords utilities misc
 ##' @export 
 dupsBetweenDFs <- function(dfs,by=NULL,matchall=FALSE) {
     dfs2 <- list()
@@ -1099,6 +1123,7 @@ dupsBetweenDFs <- function(dfs,by=NULL,matchall=FALSE) {
 ##' @param warn Whether to issue warnings from 'unique' (default is FALSE).
 ##' @return The number of unique values of 'x' excluding NA & NaN values.
 ##' @author Ben Veal
+##' @keywords utilities misc
 ##' @export 
 numUnique <- function(x,warn=FALSE) {
     length(uniqueNotNA(x,warn))
@@ -1149,6 +1174,7 @@ numUnique <- function(x,warn=FALSE) {
 ##' lsapply("data",nrow(x) > 100)
 ##' lsapply(names,"data",nrow(x) > 100)
 ##' @author Ben Veal
+##' @keywords utilities misc
 ##' @export 
 lsapply <- function(FUN=dim, pattern=".*", filter, name=globalenv(), all.names=FALSE, sorted=TRUE, inc.null=FALSE) {
     ## check types of 1st and 2nd args for non-standard use cases
